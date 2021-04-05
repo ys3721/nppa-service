@@ -9,13 +9,19 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 repositories {
-    mavenCentral()
+    maven { url 'https://maven.aliyun.com/repository/public/' }
+    maven { url 'https://maven.aliyun.com/repository/spring/'}
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    //https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-jdbc
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc', version: '2.4.4'
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.4'
     implementation 'mysql:mysql-connector-java:5.1.48'
+    //https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-thymeleaf
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf', version: '2.4.4'
+
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

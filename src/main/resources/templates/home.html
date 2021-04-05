@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>三群实名制管理</title>
+    <link rel="stylesheet" th:href="@{/style.css}" />
+</head>
+<body>
+    <h2>实名认证列表</h2>
+
+    <form method="POST">
+        <label for="userId">飞豆id</label>
+        <input type="text" name="userId"/><br/>
+        <label for="passportName">飞豆账号名</label>
+        <input type="text" name="userId"/><br/>
+        <label for="realName">实名</label>
+        <input type="text" name="userId"/><br/>
+        <label for="idNum">号码</label>
+        <input type="text" name="idNum"/><br/>
+        <input type="submit"/>
+    </form>
+
+    <u1 th:each="contact : ${contacts}">
+        <li>
+            <span th:text="${contact.id}"></span>
+            <span th:text="${contact.passportName}"></span>
+            <span th:text="${contact.authStatus}"></span>
+            <span th:text="${contact.authTime}"></span>
+        </li>
+    </u1>
+</body>
+</html>

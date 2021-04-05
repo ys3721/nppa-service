@@ -1,5 +1,7 @@
 package com.iceicelee.nppaservice.pojo;
 
+import java.sql.Timestamp;
+
 /**
  * 代表一用户吧
  *
@@ -13,6 +15,12 @@ public class User {
     private String pi;
 
     private String passportName;
+
+    private Timestamp createTime;
+
+    private byte authStatus;
+
+    private Timestamp authTime;
 
     public int getId() {
         return id;
@@ -36,5 +44,29 @@ public class User {
 
     public void setPassportName(String passportName) {
         this.passportName = passportName;
+    }
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
+
+    public byte getAuthStatus() {
+        return authStatus;
+    }
+
+    public void setAuthStatus(byte authStatus) {
+        this.authStatus = authStatus;
+    }
+
+    public Timestamp getAuthTime() {
+        return authTime;
+    }
+
+    public void setAuthTime(Timestamp authTime) {
+        this.authTime = authTime;
     }
 }

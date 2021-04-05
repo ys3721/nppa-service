@@ -10,12 +10,12 @@ import java.sql.SQLException;
 @SpringBootTest
 class NppaServiceApplicationTests {
 
-    @Autowired
-    DataSource dataSource;
+   // @Autowired
+   // DataSource dataSource;
 
     @Test
     void contextLoads() throws SQLException {
-        System.out.println(dataSource.getConnection());
+        //System.out.println(dataSource.getConnection());
     }
 
 }

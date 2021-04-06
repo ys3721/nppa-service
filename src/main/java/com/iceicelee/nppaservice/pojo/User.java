@@ -10,7 +10,7 @@ import java.sql.Timestamp;
  */
 public class User {
 
-    private int id;
+    private long id;
 
     private String pi;
 
@@ -22,13 +22,9 @@ public class User {
 
     private Timestamp authTime;
 
-    public int getId() {
-        return id;
-    }
+    private String realName;
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    private String idNumber;
 
     public String getPi() {
         return pi;
@@ -68,5 +64,29 @@ public class User {
 
     public void setAuthTime(Timestamp authTime) {
         this.authTime = authTime;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getRealName() {
+        return realName;
+    }
+
+    public void setRealName(String realName) {
+        this.realName = realName;
+    }
+
+    public String getIdNumber() {
+        return idNumber;
+    }
+
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
     }
 }

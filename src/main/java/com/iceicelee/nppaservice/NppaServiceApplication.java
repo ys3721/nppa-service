@@ -9,5 +9,4 @@ public class NppaServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(NppaServiceApplication.class, args);
     }
-
 }

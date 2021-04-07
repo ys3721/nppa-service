@@ -1,5 +1,6 @@
 package com.iceicelee.nppaservice.service;
 
+import com.iceicelee.nppaservice.config.NppaConfig;
 import com.iceicelee.nppaservice.constants.AuthenticationConstants.AuthenticationStatus;
 import com.iceicelee.nppaservice.dao.UserDao;
 import com.iceicelee.nppaservice.http.IHttpClient;
@@ -8,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 首先如果user对象不存在的话那么就创建一个
@@ -27,6 +30,8 @@ public class AuthenticationService {
     private UserDao userDao;
 
     private IHttpClient httpClient;
+
+    private NppaConfig nppaConfig;
 
     @Autowired
     public AuthenticationService(UserDao userDao, IHttpClient httpClient) {
@@ -88,12 +93,47 @@ public class AuthenticationService {
      */
     public void goNppaAuthCheck(User user) {
         String url = AUTH_URL + "/check/";
+        String postData = this.buildEncryptData(user);
+        Map<String, String> reqHeadMap = this.buildCommonReqHeadMap();
+        String sign =  Global.getSignService().sign(reqHeadMap, null, postData);
+        if (sign == null) {
+            //lgo
+            return;
+        }
+        reqHeadMap.put("sign", sign);
+        httpClient.post(url, )
     }
 
+    public String buildEncryptData() {
+        JSONObject jo = new JSONObject();
+        jo.put("ai", ai);
+        jo.put("name", name);
+        jo.put("idNum", idNum);
+        String dataStr = jo.toString();
+
+        byte[] byteSecretKey = EncryptUtils.hexStringToByte(Global.getConfig().getSecretKey());
+        String dataContent = EncryptUtils.aesGcmEncrypt(dataStr, byteSecretKey);
+        JSONObject postBody = new JSONObject();
+        postBody.put("data", dataContent);
+        return postBody.toString();
+    }
+
+    private Map<String, String> buildCommonReqHeadMap() {
+        Map<String, String> headPropertyMap = new HashMap<>(this.getNppaConfig().getAppIdAndBizIdMap());
+        headPropertyMap.put("timestamps", System.currentTimeMillis() + "");
+        return headPropertyMap;
+    }
     public void goNppaAuthQuery(User user) {
 
     }
 
+    public NppaConfig getNppaConfig() {
+        return nppaConfig;
+    }
 
+    @Autowired
+    public void setNppaConfig(NppaConfig nppaConfig) {
+        this.nppaConfig = nppaConfig;
+    }
 
 }

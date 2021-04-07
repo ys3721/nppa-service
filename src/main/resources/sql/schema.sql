@@ -6,6 +6,7 @@ USE `sq_nppa`;
 
 CREATE TABLE `t_user`(
     `id` bigint(20) NOT NULL COMMENT '平台ID',
+    `gameId` int(11) NOT NULL COMMENT '游戏id',
     `pi` varchar(128) DEFAULT NULL COMMENT '已通过实名认证用户的唯一标识',
     `passportName` varchar(255) DEFAULT NULL COMMENT '角色在飞豆平台的名字',
     `realName` varchar(128) DEFAULT NULL COMMENT '玩家的名字',

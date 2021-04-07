@@ -57,10 +57,15 @@ public class UserDao {
                 });
     }
 
+    /**
+     * 存储这个User
+     *
+     * @param user
+     */
     public void save(User user) {
-        jdbc.update("insert into t_user (id, pi, passportName, realName, idNum, createTime, authStatus, authTime) " +
-                        "values (?, ?, ?, ?, ?, ?, ?, ?)",
-                user.getId(), user.getPi(), user.getPassportName(), user.getRealName(), user.getIdNumber(), user.getCreateTime(),
+        jdbc.update("insert into t_user (id, pi, gameId, passportName, realName, idNum, createTime, authStatus, authTime) " +
+                        "values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                user.getId(), user.getPi(), user.getGameId(), user.getPassportName(), user.getRealName(), user.getIdNumber(), user.getCreateTime(),
                 user.getAuthStatus(), user.getAuthTime());
     }
 

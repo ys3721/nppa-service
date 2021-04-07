@@ -1,5 +1,7 @@
 package com.iceicelee.nppaservice.pojo;
 
+import com.iceicelee.nppaservice.constants.AuthenticationConstants.AuthenticationStatus;
+
 import java.sql.Timestamp;
 
 /**
@@ -26,6 +28,8 @@ public class User {
 
     private String idNumber;
 
+    private int gameId;
+
     public String getPi() {
         return pi;
     }
@@ -48,14 +52,6 @@ public class User {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
-    }
-
-    public byte getAuthStatus() {
-        return authStatus;
-    }
-
-    public void setAuthStatus(byte authStatus) {
-        this.authStatus = authStatus;
     }
 
     public Timestamp getAuthTime() {
@@ -88,5 +84,21 @@ public class User {
 
     public void setIdNumber(String idNumber) {
         this.idNumber = idNumber;
+    }
+
+    public void setGameId(int gameId) {
+        this.gameId = gameId;
+    }
+
+    public int getGameId() {
+        return gameId;
+    }
+
+    public byte getAuthStatus() {
+        return authStatus;
+    }
+
+    public void setAuthStatus(byte authStatus) {
+        this.authStatus = authStatus;
     }
 }

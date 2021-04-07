@@ -1,7 +1,9 @@
 package com.iceicelee.nppaservice.controller;
 
+import com.iceicelee.nppaservice.constants.AuthenticationConstants.AuthenticationStatus;
 import com.iceicelee.nppaservice.dao.UserDao;
 import com.iceicelee.nppaservice.pojo.User;
+import com.iceicelee.nppaservice.service.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +23,13 @@ public class AuthenticationController {
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
+    private AuthenticationService authService;
+
     @Autowired
-    private UserDao userDao;
+    public AuthenticationController(AuthenticationService authService) {
+        this.authService = authService;
+    }
+
     /**
      * 实名认证验证接口
      * timestamp	Int	标准时间戳（精确到秒），例如：1270605064。
@@ -42,24 +49,35 @@ public class AuthenticationController {
                            @RequestParam(name="idcard") String idCard,
                            @RequestParam String sign
                            ) {
+        //check sign and time timestamp
+
+        //还是要把对象取过来
+        User user = authService.findOrBuildUser(userId, gameId, name, idCard);
         //检查是不是已经认证状态 或者 认证中的状态
-
-        //没有认证，去认证
-
-        //认证中 那么去取结果
-        //
-        User user = userDao.findById(userId);
-        if (user == null) {
-            user = new User();
-            user.setId(userId);
-            user.setPassportName("");
-            user.setRealName(name);
-            user.setIdNumber(idCard);
-            user.setAuthStatus((byte) 4);
-            user.setCreateTime(new Timestamp(System.currentTimeMillis()));
-            userDao.save(user);
+        AuthenticationStatus authStatus  = AuthenticationStatus.codeOfStatus(user.getAuthStatus());
+        if (authStatus == AuthenticationStatus.SUCCESS) {
+            //这个抽象成对象和状态吧
+            return "ok:1";
         }
-        return "ok:1";
+        //新创建的角色，去认证
+        if (authStatus == AuthenticationStatus.INITIALIZE) {
+            authService.goNppaAuthCheck(user);
+            if (AuthenticationStatus.SUCCESS == AuthenticationStatus.codeOfStatus(user.getAuthStatus())) {
+                return "ok:1";
+            }
+            if (AuthenticationStatus.UNDER_WAY == AuthenticationStatus.codeOfStatus(user.getAuthStatus())) {
+                return "ok:2";
+            }
+        }
+        //之前的结果还没返回，再去取一次
+        if (authStatus == AuthenticationStatus.UNDER_WAY) {
+            authService.goNppaAuthQuery(user);
+        }
+        //失败了 告诉他失败了 让他换个身份再来试试
+        if (authStatus == AuthenticationStatus.FAIL) {
+            return "fail:7";
+        }
+        return "fail:999";
     }
 
 

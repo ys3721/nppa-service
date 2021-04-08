@@ -5,6 +5,8 @@ import com.iceicelee.nppaservice.constants.AuthenticationConstants.Authenticatio
 import com.iceicelee.nppaservice.dao.UserDao;
 import com.iceicelee.nppaservice.http.IHttpClient;
 import com.iceicelee.nppaservice.pojo.User;
+import com.iceicelee.nppaservice.utils.EncryptUtils;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +34,9 @@ public class AuthenticationService {
     private IHttpClient httpClient;
 
     private NppaConfig nppaConfig;
+
+
+    private SignService signService;
 
     @Autowired
     public AuthenticationService(UserDao userDao, IHttpClient httpClient) {
@@ -95,23 +100,28 @@ public class AuthenticationService {
         String url = AUTH_URL + "/check/";
         String postData = this.buildEncryptData(user);
         Map<String, String> reqHeadMap = this.buildCommonReqHeadMap();
-        String sign =  Global.getSignService().sign(reqHeadMap, null, postData);
+        String sign =  signService.sign(reqHeadMap, null, postData);
         if (sign == null) {
             //lgo
             return;
         }
         reqHeadMap.put("sign", sign);
-        httpClient.post(url, )
+        String respStr = httpClient.post(url, reqHeadMap, postData);
     }
 
-    public String buildEncryptData() {
+    /**
+     *
+     * @param user
+     * @return
+     */
+    public String buildEncryptData(User user) {
         JSONObject jo = new JSONObject();
-        jo.put("ai", ai);
-        jo.put("name", name);
-        jo.put("idNum", idNum);
+        jo.put("ai", user.getId());
+        jo.put("name", user.getRealName());
+        jo.put("idNum", user.getIdNumber());
         String dataStr = jo.toString();
 
-        byte[] byteSecretKey = EncryptUtils.hexStringToByte(Global.getConfig().getSecretKey());
+        byte[] byteSecretKey = EncryptUtils.hexStringToByte(this.getNppaConfig().getSecretKey());
         String dataContent = EncryptUtils.aesGcmEncrypt(dataStr, byteSecretKey);
         JSONObject postBody = new JSONObject();
         postBody.put("data", dataContent);
@@ -136,4 +146,8 @@ public class AuthenticationService {
         this.nppaConfig = nppaConfig;
     }
 
+    @Autowired
+    public void setSignService(SignService signService) {
+        this.signService = signService;
+    }
 }

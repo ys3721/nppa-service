@@ -1,5 +1,7 @@
 package com.iceicelee.nppaservice.pojo;
 
+import net.sf.json.JSONObject;
+
 /**
  * 实名认证返回的结果
  *
@@ -30,14 +32,28 @@ public class NppaCheckResp extends AbstractNppaResponse {
      * {"errcode":4002,"errmsg":"TEST TASK NOT EXIST"}
      */
     public void parserFromJson(String resp) {
-
+        JSONObject jsonObject = JSONObject.fromObject(resp);
+        this.setErrcode(jsonObject.getInt("errorcode"));
+        this.setErrmsg(jsonObject.getString("errormsg"));
+        //写的有的诡异呢 感觉是个递归就行了
+        if (jsonObject.containsKey("data")) {
+            CheckRespData data = new CheckRespData();
+            this.setData(data);
+            JSONObject dataJson = jsonObject.getJSONObject("data");
+            if (dataJson.containsKey("result")) {
+                JSONObject resultJson = dataJson.getJSONObject("result");
+                CheckRespData.CheckRespResult result = new CheckRespData.CheckRespResult(
+                        resultJson.getInt("status"), resultJson.getString("pi"));
+                data.setResult(result);
+            }
+        }
     }
 
     /**
      * @author: Yao Shuai
      * @date: 2021/4/9 20:57
      */
-    class CheckRespData {
+    public static class CheckRespData {
 
         private CheckRespResult result;
 
@@ -49,7 +65,7 @@ public class NppaCheckResp extends AbstractNppaResponse {
             this.result = result;
         }
 
-        class CheckRespResult {
+        static class CheckRespResult {
             final int status;
             final String pi;
 
@@ -58,6 +74,22 @@ public class NppaCheckResp extends AbstractNppaResponse {
                 this.pi = pi;
             }
         }
+
     }
 
+    public CheckRespData getData() {
+        return data;
+    }
+
+    public void setData(CheckRespData data) {
+        this.data = data;
+    }
+
+    public int getStatus() {
+        return this.getData().getResult().status;
+    }
+
+    public String getPi() {
+        return this.getData().getResult().pi;
+    }
 }

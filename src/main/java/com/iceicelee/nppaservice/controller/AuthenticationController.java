@@ -1,6 +1,7 @@
 package com.iceicelee.nppaservice.controller;
 
 import com.iceicelee.nppaservice.constants.AuthenticationConstants.AuthenticationStatus;
+import com.iceicelee.nppaservice.pojo.NppaCheckResp;
 import com.iceicelee.nppaservice.pojo.User;
 import com.iceicelee.nppaservice.service.AuthenticationService;
 import com.iceicelee.nppaservice.service.UserService;
@@ -50,53 +51,41 @@ public class AuthenticationController {
                            @RequestParam String sign
                            ) {
         //check sign and time timestamp
-
+        long now = System.currentTimeMillis();
         //取user对象，如果为空，那么直接去nppa验证
         User user = userService.findUserByPassportId(userId);
         if (user == null) {
             //同步验证 这里会比较卡哇 fixme 需要压测一下 这个boot的线程模型是个啥样的哇？
-            authService.goNppaAuthCheck(userId+"", name, idCard);
+            NppaCheckResp response = authService.goNppaAuthCheck(userId+"", name, idCard);
             //验证 -验证成功 或者 验证中 存库
+            if (response.getErrcode() == 0 && response.getData() != null) {
+                int status = response.getStatus();
+                String pi = response.getPi();
+                //认证失败
+                if (status == AuthenticationStatus.FAIL.getCode()) {
+                    return "fail:7";
+                } else if (status == AuthenticationStatus.SUCCESS.getCode()) {
+                    userService.createUserAndSave(userId, gameId, pi, "", name, idCard, timesTamp, status, now);
+                    return "ok:1";
 
-            //验证失败 直接返回失败 放弃存库
+                } else if (status == AuthenticationStatus.UNDER_WAY.getCode()) {
+                    //成功 存库 并且返回成功
+                    userService.createUserAndSave(userId, gameId, pi, "", name, idCard, timesTamp, status, now);
+                    return "ok:2";
+                } else {
+                    // log
+                    return "fail:999";
+                }
+            }
         } else {
-            //如果不为空，看看认证状态， 0认证成功直接返回 1认证中 不会有2失败，因为失败不存
-            AuthenticationStatus status = user.getAuthStatus();
-            if (AuthenticationStatus.SUCCESS.equals(status)) {
+            //user 存在只能是已经通过 或者 认证中
+            if (AuthenticationStatus.SUCCESS == user.getAuthStatus()) {
                 return "ok:1";
             }
-        }
-
-        //验证 -验证成功 或者 验证中 存库
-        //验证失败 直接返回失败 放弃存库
-
-        //改一下顺序，先去nppa认证，如果成功或者认证中那么在存库，自己就不用validate
-
-        //还是要把对象取过来
-        User user = authService.findOrBuildUser(userId, gameId, name, idCard);
-        //检查是不是已经认证状态 或者 认证中的状态
-        AuthenticationStatus authStatus  = AuthenticationStatus.codeOf(user.getAuthStatus());
-        if (authStatus == AuthenticationStatus.SUCCESS) {
-            //这个抽象成对象和状态吧
-            return "ok:1";
-        }
-        //新创建的角色，去认证
-        if (authStatus == AuthenticationStatus.INITIALIZE) {
-            authService.goNppaAuthCheck(user);
-            if (AuthenticationStatus.SUCCESS == AuthenticationStatus.codeOf(user.getAuthStatus())) {
-                return "ok:1";
-            }
-            if (AuthenticationStatus.UNDER_WAY == AuthenticationStatus.codeOf(user.getAuthStatus())) {
+            if (AuthenticationStatus.UNDER_WAY == user.getAuthStatus()) {
+                //还是这样吧
                 return "ok:2";
             }
-        }
-        //之前的结果还没返回，再去取一次
-        if (authStatus == AuthenticationStatus.UNDER_WAY) {
-            authService.goNppaAuthQuery(user);
-        }
-        //失败了 告诉他失败了 让他换个身份再来试试
-        if (authStatus == AuthenticationStatus.FAIL) {
-            return "fail:7";
         }
         return "fail:999";
     }

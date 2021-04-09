@@ -46,7 +46,7 @@ public class AuthenticationConstants {
 
         ;
 
-        public static AuthenticationStatus codeOfStatus(byte authStatus) {
+        public static AuthenticationStatus codeOf(byte authStatus) {
             for (AuthenticationStatus v : AuthenticationStatus.values()) {
                 if (v.getCode() == authStatus) {
                     return v;

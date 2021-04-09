@@ -1,18 +1,15 @@
 package com.iceicelee.nppaservice.controller;
 
 import com.iceicelee.nppaservice.constants.AuthenticationConstants.AuthenticationStatus;
-import com.iceicelee.nppaservice.dao.UserDao;
 import com.iceicelee.nppaservice.pojo.User;
 import com.iceicelee.nppaservice.service.AuthenticationService;
+import com.iceicelee.nppaservice.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.sql.Date;
-import java.sql.Timestamp;
 
 /**
  * @author: Yao Shuai
@@ -25,9 +22,12 @@ public class AuthenticationController {
 
     private AuthenticationService authService;
 
+    private UserService userService;
+
     @Autowired
-    public AuthenticationController(AuthenticationService authService) {
+    public AuthenticationController(AuthenticationService authService, UserService userService) {
         this.authService = authService;
+        this.userService = userService;
     }
 
     /**
@@ -51,10 +51,31 @@ public class AuthenticationController {
                            ) {
         //check sign and time timestamp
 
+        //取user对象，如果为空，那么直接去nppa验证
+        User user = userService.findUserByPassportId(userId);
+        if (user == null) {
+            //同步验证 这里会比较卡哇 fixme 需要压测一下 这个boot的线程模型是个啥样的哇？
+            authService.goNppaAuthCheck(userId+"", name, idCard);
+            //验证 -验证成功 或者 验证中 存库
+
+            //验证失败 直接返回失败 放弃存库
+        } else {
+            //如果不为空，看看认证状态， 0认证成功直接返回 1认证中 不会有2失败，因为失败不存
+            AuthenticationStatus status = user.getAuthStatus();
+            if (AuthenticationStatus.SUCCESS.equals(status)) {
+                return "ok:1";
+            }
+        }
+
+        //验证 -验证成功 或者 验证中 存库
+        //验证失败 直接返回失败 放弃存库
+
+        //改一下顺序，先去nppa认证，如果成功或者认证中那么在存库，自己就不用validate
+
         //还是要把对象取过来
         User user = authService.findOrBuildUser(userId, gameId, name, idCard);
         //检查是不是已经认证状态 或者 认证中的状态
-        AuthenticationStatus authStatus  = AuthenticationStatus.codeOfStatus(user.getAuthStatus());
+        AuthenticationStatus authStatus  = AuthenticationStatus.codeOf(user.getAuthStatus());
         if (authStatus == AuthenticationStatus.SUCCESS) {
             //这个抽象成对象和状态吧
             return "ok:1";
@@ -62,10 +83,10 @@ public class AuthenticationController {
         //新创建的角色，去认证
         if (authStatus == AuthenticationStatus.INITIALIZE) {
             authService.goNppaAuthCheck(user);
-            if (AuthenticationStatus.SUCCESS == AuthenticationStatus.codeOfStatus(user.getAuthStatus())) {
+            if (AuthenticationStatus.SUCCESS == AuthenticationStatus.codeOf(user.getAuthStatus())) {
                 return "ok:1";
             }
-            if (AuthenticationStatus.UNDER_WAY == AuthenticationStatus.codeOfStatus(user.getAuthStatus())) {
+            if (AuthenticationStatus.UNDER_WAY == AuthenticationStatus.codeOf(user.getAuthStatus())) {
                 return "ok:2";
             }
         }

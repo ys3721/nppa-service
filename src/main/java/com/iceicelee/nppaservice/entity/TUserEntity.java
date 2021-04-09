@@ -1,28 +1,26 @@
-package com.iceicelee.nppaservice.pojo;
-
-import com.iceicelee.nppaservice.constants.AuthenticationConstants.AuthenticationStatus;
+package com.iceicelee.nppaservice.entity;
 
 import java.sql.Timestamp;
 
 /**
- * 代表一用户吧
+ * user类的实体类对象 方便切换dao实现
  *
  * @author: Yao Shuai
- * @date: 2021/4/2 15:58
+ * @date: 2021/4/9 19:48
  */
-public class User {
+public class TUserEntity {
 
     private long id;
 
-    private int gameId;
-
     private String pi;
+
+    private int gameId;
 
     private String passportName;
 
     private Timestamp createTime;
 
-    private AuthenticationStatus authStatus;
+    private byte authStatus;
 
     private Timestamp authTime;
 
@@ -30,25 +28,6 @@ public class User {
 
     private String idNumber;
 
-    public User() {
-    }
-
-    public User(long id) {
-        this.id = id;
-    }
-
-    public User(long id, int gameId, String pi, String passportName, Timestamp createTime,
-                AuthenticationStatus authStatus, Timestamp authTime, String realName, String idNumber) {
-        this.id = id;
-        this.gameId = gameId;
-        this.pi = pi;
-        this.passportName = passportName;
-        this.createTime = createTime;
-        this.authStatus = authStatus;
-        this.authTime = authTime;
-        this.realName = realName;
-        this.idNumber = idNumber;
-    }
 
     public long getId() {
         return id;
@@ -56,14 +35,6 @@ public class User {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public int getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(int gameId) {
-        this.gameId = gameId;
     }
 
     public String getPi() {
@@ -90,11 +61,11 @@ public class User {
         this.createTime = createTime;
     }
 
-    public AuthenticationStatus getAuthStatus() {
+    public byte getAuthStatus() {
         return authStatus;
     }
 
-    public void setAuthStatus(AuthenticationStatus authStatus) {
+    public void setAuthStatus(byte authStatus) {
         this.authStatus = authStatus;
     }
 
@@ -120,5 +91,13 @@ public class User {
 
     public void setIdNumber(String idNumber) {
         this.idNumber = idNumber;
+    }
+
+    public int getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(int gameId) {
+        this.gameId = gameId;
     }
 }

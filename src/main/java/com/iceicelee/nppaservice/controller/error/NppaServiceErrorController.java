@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class NppaServiceErrorController implements ErrorController {
+
     private static final String PATH = "/error";
 
     @RequestMapping(value = PATH)

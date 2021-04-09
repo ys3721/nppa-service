@@ -7,8 +7,9 @@ import com.iceicelee.nppaservice.http.IHttpClient;
 import com.iceicelee.nppaservice.pojo.User;
 import com.iceicelee.nppaservice.utils.EncryptUtils;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -23,7 +24,7 @@ import java.util.Map;
  * @author: Yao Shuai
  * @date: 2021/4/6 20:08
  */
-@Component
+@Service
 public class AuthenticationService {
 
     // FIXME: 2021/4/7 先放这儿吧
@@ -54,26 +55,6 @@ public class AuthenticationService {
         this.userDao = userDao;
     }
 
-    /**
-     * @// FIXME: 2021/4/7  这个地方其实nppa验证不通过不需要存库 省的来一大堆没用的非法数据
-     * 按照id找这个人 如果没有的话就初始化一个并且把他存
-     *
-     * @param userId
-     * @param gameId
-     * @param name
-     * @param idCard
-     * @return
-     */
-    public User findOrBuildUser(long userId, int gameId, String name, String idCard) {
-        User user = userDao.findById(userId);
-        if (user != null) {
-            return user;
-        } else {
-            user = this.buildInitializeUser(userId, gameId, name, idCard);
-            this.userDao.save(user);
-        }
-        return user;
-    }
 
     /**
      * 创建一个没有认证的默认的user
@@ -94,11 +75,14 @@ public class AuthenticationService {
     /**
      * 去平台认证一下这个人的实名是不是真的
      * String urlStr, Map<String, String> requestProperty, String postData
-     * @param user
+     *
+     * @param ai 这个就是userid， 在nppa中定义为
+     *           本次实名认证行为在游戏内部对应的唯一标识，该标识将作为实名认证结果查询的唯一依据
+     *
      */
-    public void goNppaAuthCheck(User user) {
-        String url = AUTH_URL + "/check/";
-        String postData = this.buildEncryptData(user);
+    public void goNppaAuthCheck(String ai, String realName, String idNum) {
+        String url = AUTH_URL + "/check/"; //fixme 先这么写死了哇
+        String postData = this.buildEncryptData(ai, realName, idNum);
         Map<String, String> reqHeadMap = this.buildCommonReqHeadMap();
         String sign =  signService.sign(reqHeadMap, null, postData);
         if (sign == null) {
@@ -107,18 +91,24 @@ public class AuthenticationService {
         }
         reqHeadMap.put("sign", sign);
         String respStr = httpClient.post(url, reqHeadMap, postData);
+        System.out.println(respStr);
+        if (StringUtils.isEmpty(respStr)) {
+            //报错了吧
+        } else {
+            JSONObject jsonObject = JSONObject.fromObject(respStr);
+        }
+
     }
 
     /**
      *
-     * @param user
      * @return
      */
-    public String buildEncryptData(User user) {
+    public String buildEncryptData(String ai, String realName, String idNum) {
         JSONObject jo = new JSONObject();
-        jo.put("ai", user.getId());
-        jo.put("name", user.getRealName());
-        jo.put("idNum", user.getIdNumber());
+        jo.put("ai", ai);
+        jo.put("name", realName);
+        jo.put("idNum", idNum);
         String dataStr = jo.toString();
 
         byte[] byteSecretKey = EncryptUtils.hexStringToByte(this.getNppaConfig().getSecretKey());

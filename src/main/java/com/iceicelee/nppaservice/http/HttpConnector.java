@@ -46,6 +46,9 @@ public class HttpConnector implements IHttpClient {
             while ((line = bufferedReader.readLine()) != null) {
                 stringBuilder.append(line).append("\n");
             }
+            if (stringBuilder.length() > 0) {
+                stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -66,19 +69,23 @@ public class HttpConnector implements IHttpClient {
         connection.setReadTimeout((int) TimeUnit.SECONDS.toMillis(10));
         connection.setRequestProperty("Content-Type", "application/json;charset=utf-8");
         connection.setRequestProperty("User-Agent", "nppa-service");
-        for (Map.Entry<String, String> entry : requestProperty.entrySet()) {
-            connection.setRequestProperty(entry.getKey(), entry.getValue());
+        if (requestProperty != null) {
+            for (Map.Entry<String, String> entry : requestProperty.entrySet()) {
+                connection.setRequestProperty(entry.getKey(), entry.getValue());
+            }
         }
     }
 
     @Override
     public String get(String urlStr, Map<String, String> reqProps, Map<String, String> getParam) {
+        StringBuilder paramReqUrl = new StringBuilder("?");
         if (!getParam.isEmpty()) {
-            urlStr += "?";
             for (Map.Entry<String, String> entry : getParam.entrySet()) {
-                urlStr += (entry.getKey() + "=" + entry.getValue());
+                paramReqUrl.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
             }
+            paramReqUrl.deleteCharAt(paramReqUrl.length() - 1);
         }
+        urlStr += paramReqUrl.toString();
         URL url = null;
         HttpURLConnection connection = null;
         InputStream inputStream = null;
@@ -89,12 +96,16 @@ public class HttpConnector implements IHttpClient {
             connection = (HttpURLConnection) url.openConnection();
             configConnection(reqProps, connection);
             connection.setRequestMethod("GET");
+            System.err.println(url);
             connection.connect();
             inputStream = connection.getInputStream();
             bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             String line = null;
             while ((line = bufferedReader.readLine()) != null) {
                 stringBuilder.append(line).append("\n");
+            }
+            if (stringBuilder.length() > 0) {
+                stringBuilder.deleteCharAt(stringBuilder.length() - 1);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -105,7 +116,9 @@ public class HttpConnector implements IHttpClient {
                 connection.disconnect();
             }
         }
-        return stringBuilder.toString();
+        String responseStr = stringBuilder.toString();
+        System.err.println(responseStr);
+        return responseStr;
     }
 
     private void close(Closeable closeable) {

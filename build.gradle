@@ -6,7 +6,6 @@ plugins {
 
 group = 'com.iceicelee'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '1.8'
 
 repositories {
     maven { url 'https://maven.aliyun.com/repository/public/' }
@@ -22,7 +21,7 @@ dependencies {
     //https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-thymeleaf
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf', version: '2.4.4'
     implementation "net.sf.json-lib:json-lib:2.4:jdk15"
-
+    implementation group: 'org.springframework.boot', name: 'spring-boot-devtools', version: '2.4.4'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
@@ -30,3 +29,4 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+

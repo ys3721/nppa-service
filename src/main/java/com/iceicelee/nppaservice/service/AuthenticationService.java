@@ -32,7 +32,7 @@ public class AuthenticationService {
 
     private UserDao userDao;
 
-    private IHttpClient httpClient;
+    private final IHttpClient httpClient;
 
     private NppaConfig nppaConfig;
 
@@ -53,23 +53,6 @@ public class AuthenticationService {
     @Autowired
     public void setUserDao(UserDao userDao) {
         this.userDao = userDao;
-    }
-
-
-    /**
-     * 创建一个没有认证的默认的user
-     *
-     */
-    private User buildInitializeUser(long userId, int gameId, String name, String idCard) {
-        User welcomeUser = new User();
-        welcomeUser.setAuthStatus((byte) AuthenticationStatus.INITIALIZE.getCode());
-        welcomeUser.setId(userId);
-        welcomeUser.setGameId(gameId);
-        welcomeUser.setRealName(name);
-        welcomeUser.setIdNumber(idCard);
-        welcomeUser.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        this.userDao.save(welcomeUser);
-        return welcomeUser;
     }
 
     /**

@@ -1,21 +1,30 @@
 package com.iceicelee.nppaservice.controller;
 
 import com.iceicelee.nppaservice.constants.AuthenticationConstants.AuthenticationStatus;
+import com.iceicelee.nppaservice.http.IHttpClient;
+import com.iceicelee.nppaservice.pojo.FeidouLoginCheckResp;
 import com.iceicelee.nppaservice.pojo.User;
 import com.iceicelee.nppaservice.service.AuthenticationService;
 import com.iceicelee.nppaservice.service.UserService;
+import com.iceicelee.nppaservice.utils.EncryptUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author: Yao Shuai
  * @date: 2021/4/6 20:06
  */
 @RestController
+@RequestMapping("/sdk")
 public class AuthenticationController {
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
@@ -24,10 +33,75 @@ public class AuthenticationController {
 
     private UserService userService;
 
+    private IHttpClient httpClient;
+
     @Autowired
     public AuthenticationController(AuthenticationService authService, UserService userService) {
         this.authService = authService;
         this.userService = userService;
+    }
+
+    /**
+     * 	   "timestamp", fdloginrequest.gettimestamp());
+     *  "gameid", fdloginrequest.getgameid());
+     *  "serverid", fdloginrequest.getserverid());
+     *  "logintype", fdloginrequest.getlogintype());
+     *  "device", fdloginrequest.getdevice());
+     *  "devicetype", fdloginrequest.getdevicetype());
+     *  "serverid", fdloginrequest.getdeviceversion());
+     *  "deviceudid", fdloginrequest.getdeviceudid());
+     *  "devicemac", getMac(activity));
+     *  "deviceidfa","-1");
+     *  "appversion", fdloginrequest.getappversion());
+     *  "appsflyerid",fdloginrequest.getappsflyerid());
+     *  "sdktitle",getAppVersion(activity) );
+     *  "sdkversion", getAppVersion(activity));
+     *  "username", fdloginrequest.getusername());
+     *  "password",fdloginrequest.getpassword());
+     *  "sign", fdloginrequest.g
+     * @return
+     */
+    @RequestMapping(value = "local.logincheck.go")
+    public String loginCheck(HttpServletRequest req, int timestamp, int gameid, int serverid, int logintype, String device,
+                             String devicetype, String deviceversion, String deviceudid, String devicemac,
+                             String deviceidfa, String appversion, String appsflyerid, String sdktitle,
+                             String sdkversion, String username, String password, String sign) {
+        String ip = req.getRemoteAddr();
+        //先去飞豆取飞豆号
+        String loginCheckUrl = "http://api.feidou.com/local.logincheck.php";
+        Map<String, String> usreParams = new LinkedHashMap<>();
+        //md5(timestamp+username+ip+gameid+serverid+password+logintype+key)注意顺序。
+        String localSign = EncryptUtils.encodeByMD5(timestamp+username+ip+"5614"+serverid+password+logintype+"qWIbvFQpdIrtUg4MayqW");
+        usreParams.put("timestamp", timestamp+"");
+        usreParams.put("username", username);
+        usreParams.put("ip", ip);
+        usreParams.put("gameid", gameid+"");
+        usreParams.put("serverid", serverid+"");
+        usreParams.put("password", password);
+        usreParams.put("logintype", logintype+"");
+        usreParams.put("device", device);
+        usreParams.put("devicetype", devicetype);
+        usreParams.put("deviceversion", deviceversion);
+        usreParams.put("deviceudid", deviceudid);
+        usreParams.put("devicemac", devicemac);
+        usreParams.put("deviceidfa", deviceidfa);
+        usreParams.put("appversion", appversion);
+        usreParams.put("appsflyerid", appsflyerid);
+        usreParams.put("sign",localSign);
+        String localResult = this.getHttpClient().get(loginCheckUrl, null, usreParams);
+        //如果失败直接原样返还吧
+        FeidouLoginCheckResp loginCheckResp = new FeidouLoginCheckResp();
+        loginCheckResp.parse(localResult);
+        if (!loginCheckResp.isOk()) {
+            return localResult;
+        } else {
+            userService.findUserByPassportId(loginCheckResp.getUserId());
+        }
+
+        //真有这个人 取他的userid判断一下是不是已经 上报过nppa了 状态是啥
+
+
+        return "1";
     }
 
     /**
@@ -41,7 +115,7 @@ public class AuthenticationController {
      *
      * @return
      */
-    @GetMapping("/local.faceid.php")
+    @GetMapping("/local.faceid.go")
     public String greeting(@RequestParam(name="timesTamp") int timesTamp,
                            @RequestParam(name="userId") long userId,
                            @RequestParam(name="gameId") int gameId,
@@ -66,40 +140,15 @@ public class AuthenticationController {
                 return "ok:1";
             }
         }
-
-        //验证 -验证成功 或者 验证中 存库
-        //验证失败 直接返回失败 放弃存库
-
-        //改一下顺序，先去nppa认证，如果成功或者认证中那么在存库，自己就不用validate
-
-        //还是要把对象取过来
-        User user = authService.findOrBuildUser(userId, gameId, name, idCard);
-        //检查是不是已经认证状态 或者 认证中的状态
-        AuthenticationStatus authStatus  = AuthenticationStatus.codeOf(user.getAuthStatus());
-        if (authStatus == AuthenticationStatus.SUCCESS) {
-            //这个抽象成对象和状态吧
-            return "ok:1";
-        }
-        //新创建的角色，去认证
-        if (authStatus == AuthenticationStatus.INITIALIZE) {
-            authService.goNppaAuthCheck(user);
-            if (AuthenticationStatus.SUCCESS == AuthenticationStatus.codeOf(user.getAuthStatus())) {
-                return "ok:1";
-            }
-            if (AuthenticationStatus.UNDER_WAY == AuthenticationStatus.codeOf(user.getAuthStatus())) {
-                return "ok:2";
-            }
-        }
-        //之前的结果还没返回，再去取一次
-        if (authStatus == AuthenticationStatus.UNDER_WAY) {
-            authService.goNppaAuthQuery(user);
-        }
-        //失败了 告诉他失败了 让他换个身份再来试试
-        if (authStatus == AuthenticationStatus.FAIL) {
-            return "fail:7";
-        }
         return "fail:999";
     }
 
+    public IHttpClient getHttpClient() {
+        return httpClient;
+    }
 
+    @Autowired
+    public void setHttpClient(IHttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
 }

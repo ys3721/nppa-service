@@ -96,7 +96,20 @@ public class AuthenticationController {
         if (!loginCheckResp.isOk()) {
             return localResult;
         } else {
-            userService.findUserByPassportId(loginCheckResp.getUserId());
+            User user = userService.findUserByPassportId(loginCheckResp.getUserId());
+            if (user != null) {
+                if (AuthenticationStatus.FAIL.equals(user.getAuthStatus())) {
+                    //设置不完整 生日信息空 是防沉迷对象
+                    loginCheckResp.setAddictInfoCompletion(0);
+                    loginCheckResp.setBothDayInfo("0");
+                    loginCheckResp.setNeedPreventAddict(1);
+                    return loginCheckResp.toResponseString();
+                }
+                if (AuthenticationStatus.UNDER_WAY.equals(user.getAuthStatus())) {
+                    //设置 是防沉迷对象， 认证信息完整， 生日随便给一个
+                    log
+                }
+            }
         }
 
         //真有这个人 取他的userid判断一下是不是已经 上报过nppa了 状态是啥

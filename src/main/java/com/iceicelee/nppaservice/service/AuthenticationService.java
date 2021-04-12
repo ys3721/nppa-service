@@ -1,9 +1,9 @@
 package com.iceicelee.nppaservice.service;
 
 import com.iceicelee.nppaservice.config.NppaConfig;
-import com.iceicelee.nppaservice.constants.AuthenticationConstants.AuthenticationStatus;
 import com.iceicelee.nppaservice.dao.UserDao;
 import com.iceicelee.nppaservice.http.IHttpClient;
+import com.iceicelee.nppaservice.pojo.NppaCheckResp;
 import com.iceicelee.nppaservice.pojo.User;
 import com.iceicelee.nppaservice.utils.EncryptUtils;
 import net.sf.json.JSONObject;
@@ -11,7 +11,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,23 +62,23 @@ public class AuthenticationService {
      *           本次实名认证行为在游戏内部对应的唯一标识，该标识将作为实名认证结果查询的唯一依据
      *
      */
-    public void goNppaAuthCheck(String ai, String realName, String idNum) {
+    public NppaCheckResp goNppaAuthCheck(String ai, String realName, String idNum) {
         String url = AUTH_URL + "/check/"; //fixme 先这么写死了哇
         String postData = this.buildEncryptData(ai, realName, idNum);
         Map<String, String> reqHeadMap = this.buildCommonReqHeadMap();
         String sign =  signService.sign(reqHeadMap, null, postData);
-        if (sign == null) {
-            //lgo
-            return;
-        }
         reqHeadMap.put("sign", sign);
         String respStr = httpClient.post(url, reqHeadMap, postData);
         System.out.println(respStr);
+        NppaCheckResp nppaCheckResp = new NppaCheckResp();
         if (StringUtils.isEmpty(respStr)) {
             //报错了吧
+            nppaCheckResp.setErrcode(10086);
+            nppaCheckResp.setErrmsg("服务器内部错误");
         } else {
-            JSONObject jsonObject = JSONObject.fromObject(respStr);
+            nppaCheckResp.parserFromJson(respStr);
         }
+        return nppaCheckResp;
 
     }
 

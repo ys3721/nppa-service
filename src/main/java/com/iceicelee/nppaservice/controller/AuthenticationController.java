@@ -3,6 +3,7 @@ package com.iceicelee.nppaservice.controller;
 import com.iceicelee.nppaservice.constants.AuthenticationConstants.AuthenticationStatus;
 import com.iceicelee.nppaservice.http.IHttpClient;
 import com.iceicelee.nppaservice.pojo.FeidouLoginCheckResp;
+import com.iceicelee.nppaservice.pojo.NppaCheckResp;
 import com.iceicelee.nppaservice.pojo.User;
 import com.iceicelee.nppaservice.service.AuthenticationService;
 import com.iceicelee.nppaservice.service.UserService;
@@ -124,20 +125,31 @@ public class AuthenticationController {
                            @RequestParam String sign
                            ) {
         //check sign and time timestamp
-
+        long now = System.currentTimeMillis();
         //取user对象，如果为空，那么直接去nppa验证
         User user = userService.findUserByPassportId(userId);
         if (user == null) {
             //同步验证 这里会比较卡哇 fixme 需要压测一下 这个boot的线程模型是个啥样的哇？
-            authService.goNppaAuthCheck(userId+"", name, idCard);
+            NppaCheckResp response = authService.goNppaAuthCheck(userId+"", name, idCard);
             //验证 -验证成功 或者 验证中 存库
+            if (response.getErrcode() == 0 && response.getData() != null) {
+                int status = response.getStatus();
+                String pi = response.getPi();
+                //认证失败
+                if (status == AuthenticationStatus.FAIL.getCode()) {
+                    return "fail:7";
+                } else if (status == AuthenticationStatus.SUCCESS.getCode()) {
+                    userService.createUserAndSave(userId, gameId, pi, "", name, idCard, timesTamp, status, now);
+                    return "ok:1";
 
-            //验证失败 直接返回失败 放弃存库
-        } else {
-            //如果不为空，看看认证状态， 0认证成功直接返回 1认证中 不会有2失败，因为失败不存
-            AuthenticationStatus status = user.getAuthStatus();
-            if (AuthenticationStatus.SUCCESS.equals(status)) {
-                return "ok:1";
+                } else if (status == AuthenticationStatus.UNDER_WAY.getCode()) {
+                    //成功 存库 并且返回成功
+                    userService.createUserAndSave(userId, gameId, pi, "", name, idCard, timesTamp, status, now);
+                    return "ok:2";
+                } else {
+                    // log
+                    return "fail:999";
+                }
             }
         }
         return "fail:999";

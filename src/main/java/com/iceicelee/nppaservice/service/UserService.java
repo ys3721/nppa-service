@@ -7,6 +7,9 @@ import com.iceicelee.nppaservice.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author: Yao Shuai
  * @date: 2021/4/9 19:45
@@ -66,4 +69,18 @@ public class UserService implements IUserService {
         return entity;
     }
 
+    public void createUserAndSave(long userId, int gameId, String pi, String passportName, String realName,
+                                  String idCard, int reqTimeSec, int status, long now) {
+        User user = new User();
+        user.setId(userId);
+        user.setGameId(gameId);
+        user.setPi(pi);
+        user.setPassportName(passportName);
+        user.setRealName(realName);
+        user.setIdNumber(idCard);
+        user.setCreateTime(new Timestamp(reqTimeSec * 1000L));
+        user.setAuthStatus(AuthenticationStatus.codeOf((byte) status));
+        user.setAuthTime(new Timestamp(now));
+        this.userDao.saveTUserEntity(this.toEntity(user));
+    }
 }

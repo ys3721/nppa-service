@@ -70,26 +70,26 @@ public class AuthenticationController {
         String ip = req.getRemoteAddr();
         //先去飞豆取飞豆号
         String loginCheckUrl = "http://api.feidou.com/local.logincheck.php";
-        Map<String, String> usreParams = new LinkedHashMap<>();
+        Map<String, String> localReqParams = new LinkedHashMap<>();
         //md5(timestamp+username+ip+gameid+serverid+password+logintype+key)注意顺序。
         String localSign = EncryptUtils.encodeByMD5(timestamp+username+ip+"5614"+serverid+password+logintype+"qWIbvFQpdIrtUg4MayqW");
-        usreParams.put("timestamp", timestamp+"");
-        usreParams.put("username", username);
-        usreParams.put("ip", ip);
-        usreParams.put("gameid", gameid+"");
-        usreParams.put("serverid", serverid+"");
-        usreParams.put("password", password);
-        usreParams.put("logintype", logintype+"");
-        usreParams.put("device", device);
-        usreParams.put("devicetype", devicetype);
-        usreParams.put("deviceversion", deviceversion);
-        usreParams.put("deviceudid", deviceudid);
-        usreParams.put("devicemac", devicemac);
-        usreParams.put("deviceidfa", deviceidfa);
-        usreParams.put("appversion", appversion);
-        usreParams.put("appsflyerid", appsflyerid);
-        usreParams.put("sign",localSign);
-        String localResult = this.getHttpClient().get(loginCheckUrl, null, usreParams);
+        localReqParams.put("timestamp", timestamp+"");
+        localReqParams.put("username", username);
+        localReqParams.put("ip", ip);
+        localReqParams.put("gameid", gameid+"");
+        localReqParams.put("serverid", serverid+"");
+        localReqParams.put("password", password);
+        localReqParams.put("logintype", logintype+"");
+        localReqParams.put("device", device);
+        localReqParams.put("devicetype", devicetype);
+        localReqParams.put("deviceversion", deviceversion);
+        localReqParams.put("deviceudid", deviceudid);
+        localReqParams.put("devicemac", devicemac);
+        localReqParams.put("deviceidfa", deviceidfa);
+        localReqParams.put("appversion", appversion);
+        localReqParams.put("appsflyerid", appsflyerid);
+        localReqParams.put("sign", localSign);
+        String localResult = this.getHttpClient().get(loginCheckUrl, null, localReqParams);
         //如果失败直接原样返还吧
         FeidouLoginCheckResp loginCheckResp = new FeidouLoginCheckResp();
         loginCheckResp.parse(localResult);
@@ -104,18 +104,28 @@ public class AuthenticationController {
                     loginCheckResp.setBothDayInfo("0");
                     loginCheckResp.setNeedPreventAddict(1);
                     return loginCheckResp.toResponseString();
-                }
-                if (AuthenticationStatus.UNDER_WAY.equals(user.getAuthStatus())) {
+                } else if (AuthenticationStatus.UNDER_WAY.equals(user.getAuthStatus())) {
                     //设置 是防沉迷对象， 认证信息完整， 生日随便给一个
-                    log
+                    loginCheckResp.setAddictInfoCompletion(1);
+                    loginCheckResp.setBothDayInfo("2020-02-02");
+                    loginCheckResp.setNeedPreventAddict(1);
+                    return loginCheckResp.toResponseString();
+                } else {
+                    //他成功了
+                    loginCheckResp.setAddictInfoCompletion(1);
+                    //取pi看看生日啥 xxxxxxxxxxxx明天从这开始吧
+                    loginCheckResp.setNeedPreventAddict(0);
+                    loginCheckResp.setBothDayInfo("1920-02-02");
+                    return loginCheckResp.toResponseString();
                 }
+            } else {
+                //没有这个货，通通要去验证 告诉客户端实名信息不全
+                loginCheckResp.setAddictInfoCompletion(0);
+                loginCheckResp.setBothDayInfo("0");
+                loginCheckResp.setNeedPreventAddict(1);
+                return loginCheckResp.toResponseString();
             }
         }
-
-        //真有这个人 取他的userid判断一下是不是已经 上报过nppa了 状态是啥
-
-
-        return "1";
     }
 
     /**
@@ -130,14 +140,20 @@ public class AuthenticationController {
      * @return
      */
     @GetMapping("/local.faceid.go")
-    public String greeting(@RequestParam(name="timesTamp") int timesTamp,
-                           @RequestParam(name="userId") long userId,
-                           @RequestParam(name="gameId") int gameId,
-                           @RequestParam String name,
-                           @RequestParam(name="idcard") String idCard,
-                           @RequestParam String sign
-                           ) {
+    public String realNameAuth(HttpServletRequest req, int timestamp, int gameid, int serverid, int logintype, String device,
+                               String devicetype, String deviceversion, String deviceudid, String devicemac,
+                               String deviceidfa, String appversion, String appsflyerid, String sdktitle,
+                               String sdkversion, String username, String password, String sign,
+                               String userid, String name, String idcard) {
         //check sign and time timestamp
+        //先去飞豆实名认证一下，飞豆重复认证直,接返回ok:1,但是不会更新之前的实名认证信息
+        String faceIdCheckUrl = "http://api.feidou.com/local.faceid.php";
+
+        String localResult = this.getHttpClient().get(faceIdCheckUrl, null, usreParams);
+
+
+        xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        Map<String, String> localReqParams = new LinkedHashMap<>();
         long now = System.currentTimeMillis();
         //取user对象，如果为空，那么直接去nppa验证
         User user = userService.findUserByPassportId(userId);

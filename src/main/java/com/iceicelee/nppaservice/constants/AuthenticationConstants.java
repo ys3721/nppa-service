@@ -33,10 +33,6 @@ public class AuthenticationConstants {
          * 认证失败
          */
         FAIL(2),
-        /**
-         * 初始化之后还没去nppa认证
-         */
-        INITIALIZE(4),
         ;
         int code;
 

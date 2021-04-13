@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.Locale;
 
 /**
  * @author: Yao Shuai
@@ -160,5 +161,20 @@ public class EncryptUtils {
             }
         }
         return null;
+    }
+
+    public static long twentySix2Decimal(String txcimal) {
+        char[] txArray = txcimal.toLowerCase().toCharArray();
+        long result = 0;
+        for (int i = txArray.length - 1; i >= 0; i--) {
+            char figure = txArray[i];
+            if (figure >= 48 && figure <= 57) {
+                figure -= 48;
+            } else {
+                figure -= 87;
+            }
+            result += figure * Math.pow(26, txArray.length - i - 1);
+        }
+        return result;
     }
 }

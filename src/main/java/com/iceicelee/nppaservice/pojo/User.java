@@ -1,6 +1,8 @@
 package com.iceicelee.nppaservice.pojo;
 
 import com.iceicelee.nppaservice.constants.AuthenticationConstants.AuthenticationStatus;
+import com.iceicelee.nppaservice.utils.EncryptUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.sql.Timestamp;
 
@@ -120,5 +122,14 @@ public class User {
 
     public void setIdNumber(String idNumber) {
         this.idNumber = idNumber;
+    }
+
+    public String getBirthdayIntFromPi() {
+        if (StringUtils.isEmpty(pi)) {
+            return "0";
+        }
+        //前六位是生日部分
+        String birthdayStr = this.getPi().substring(0, 6);
+        return EncryptUtils.twentySix2Decimal(birthdayStr)+"";
     }
 }

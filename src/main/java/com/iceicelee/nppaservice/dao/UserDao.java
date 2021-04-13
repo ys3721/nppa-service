@@ -31,7 +31,8 @@ public class UserDao implements IUserEntityDao {
     }
 
     public TUserEntity queryById(long userId) {
-        String sql = "select id, pi, passportName, createTime, authStatus, authTime from t_user where id = ?";
+        String sql = "select id, gameId, pi, passportName, realName, idNum, createTime," +
+                " authStatus, authTime from t_user where id = ?";
         List<TUserEntity> results = jdbc.query(sql, new TUserEntityMapper(), userId);
         if (CollectionUtils.isEmpty(results)) {
             return null;
@@ -53,7 +54,7 @@ public class UserDao implements IUserEntityDao {
         String updateSql = "update t_user set gameId=?, pi=?, passportName=?, realName=?, " +
                 "idNum=?, createTime=?, authStatus=?, authTime=? where id = ?";
         return jdbc.update(updateSql, entity.getGameId(), entity.getPi(), entity.getPassportName(), entity.getRealName(),
-                entity.getIdNumber(), entity.getCreateTime(), entity.getAuthStatus(), entity.getAuthTime());
+                entity.getIdNumber(), entity.getCreateTime(), entity.getAuthStatus(), entity.getAuthTime(), entity.getId());
     }
 
     public List<TUserEntity> findAll() {
@@ -61,7 +62,7 @@ public class UserDao implements IUserEntityDao {
                 "from t_user", new TUserEntityMapper());
     }
 
-    class TUserEntityMapper implements RowMapper<TUserEntity> {
+    static class TUserEntityMapper implements RowMapper<TUserEntity> {
         @Override
         public TUserEntity mapRow(ResultSet rs, int rowNum) throws SQLException {
             TUserEntity userEntity = new TUserEntity();

@@ -12,6 +12,10 @@ public class NppaCheckResp extends AbstractNppaResponse {
 
     private CheckRespData data;
 
+    public boolean isErrorHappen() {
+        return this.getErrcode() != 0;
+    }
+
     /**
      * 这个结果是这样的，自己手解一下吧，
      * 是不是可以换个jackson试试？
@@ -33,8 +37,8 @@ public class NppaCheckResp extends AbstractNppaResponse {
      */
     public void parserFromJson(String resp) {
         JSONObject jsonObject = JSONObject.fromObject(resp);
-        this.setErrcode(jsonObject.getInt("errorcode"));
-        this.setErrmsg(jsonObject.getString("errormsg"));
+        this.setErrcode(jsonObject.getInt("errcode"));
+        this.setErrmsg(jsonObject.getString("errmsg"));
         //写的有的诡异呢 感觉是个递归就行了
         if (jsonObject.containsKey("data")) {
             CheckRespData data = new CheckRespData();

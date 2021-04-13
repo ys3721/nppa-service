@@ -1,5 +1,6 @@
 package com.iceicelee.nppaservice.pojo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,11 +36,11 @@ public abstract class FeidouPlatformResponse {
 
     public void parse(String respStr) {
         String result = respStr.split(":")[0];
-        if (!result.equals("ok") && result.equals("fail")) {
+        if (!result.equals("ok") && !result.equals("fail")) {
             throw new IllegalArgumentException();
         }
         String[] params = respStr.split(":");
-        List<String> paramsList = Arrays.asList(params);
+        List<String> paramsList = new ArrayList<>(Arrays.asList(params));
         paramsList.remove(0);
         this.okOrFail = result;
         this.responseParams = paramsList;
@@ -47,4 +48,8 @@ public abstract class FeidouPlatformResponse {
     }
 
     protected abstract void parseDetails();
+
+    public void setOkOrFail(String okOrFail) {
+        this.okOrFail = okOrFail;
+    }
 }

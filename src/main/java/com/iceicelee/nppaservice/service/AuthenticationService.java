@@ -27,7 +27,7 @@ import java.util.Map;
 public class AuthenticationService {
 
     // FIXME: 2021/4/7 先放这儿吧
-    public static final String AUTH_URL = "https://wlc.nppa.gov.cn/test/authentication/";
+    public static final String AUTH_URL = "https://api.wlc.nppa.gov.cn/idcard/authentication/check";
 
     private UserDao userDao;
 
@@ -63,7 +63,7 @@ public class AuthenticationService {
      *
      */
     public NppaCheckResp goNppaAuthCheck(String ai, String realName, String idNum) {
-        String url = AUTH_URL + "/check/"; //fixme 先这么写死了哇
+        String url = AUTH_URL; //fixme 先这么写死了哇
         String postData = this.buildEncryptData(ai, realName, idNum);
         Map<String, String> reqHeadMap = this.buildCommonReqHeadMap();
         String sign =  signService.sign(reqHeadMap, null, postData);

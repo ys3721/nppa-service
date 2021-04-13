@@ -83,4 +83,15 @@ public class UserService implements IUserService {
         user.setAuthTime(new Timestamp(now));
         this.userDao.saveTUserEntity(this.toEntity(user));
     }
+
+    @Override
+    public void saveOrUpdateUser(User user) {
+        User existUser = this.findUserByPassportId(user.getId());
+        if (existUser == null) {
+            this.userDao.saveTUserEntity(this.toEntity(user));
+        } else {
+            user.setCreateTime(existUser.getCreateTime());
+            this.userDao.updateTUserEntity(this.toEntity(user));
+        }
+    }
 }

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -93,5 +95,15 @@ public class UserService implements IUserService {
             user.setCreateTime(existUser.getCreateTime());
             this.userDao.updateTUserEntity(this.toEntity(user));
         }
+    }
+
+    @Override
+    public Collection<User> findUsersByStatus(AuthenticationStatus status) {
+        Collection<TUserEntity> userEntity = userDao.queryByStatus(status.getCode());
+        Collection<User> users = new ArrayList<>(userEntity.size());
+        for (TUserEntity entity : userEntity) {
+            users.add(this.fromEntity(entity));
+        }
+        return users;
     }
 }

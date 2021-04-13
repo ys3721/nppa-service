@@ -10,4 +10,6 @@ public interface IUserService {
 
     User findUserByPassportId(Long id);
 
+    void saveOrUpdateUser(User user);
+
 }

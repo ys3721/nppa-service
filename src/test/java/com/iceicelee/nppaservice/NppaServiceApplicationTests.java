@@ -24,7 +24,6 @@ class NppaServiceApplicationTests {
     @Test
     void contextLoads() throws SQLException {
         System.out.println(dataSource.getConnection());
-        userDao.findAll();
     }
 
     @Test

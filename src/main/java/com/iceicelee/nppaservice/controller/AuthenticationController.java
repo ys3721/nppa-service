@@ -140,7 +140,7 @@ public class AuthenticationController {
      *
      * @return
      */
-    @GetMapping("/local.faceid.go")
+    @RequestMapping("/local.faceid.go")
     public String realNameAuth(HttpServletRequest req, int timestamp, int gameid, int serverid, int logintype, String device,
                                String devicetype, String deviceversion, String deviceudid, String devicemac,
                                String deviceidfa, String appversion, String appsflyerid, String sdktitle,

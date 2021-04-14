@@ -10,6 +10,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -55,6 +56,17 @@ public class UserDao implements IUserEntityDao {
                 "idNum=?, createTime=?, authStatus=?, authTime=? where id = ?";
         return jdbc.update(updateSql, entity.getGameId(), entity.getPi(), entity.getPassportName(), entity.getRealName(),
                 entity.getIdNumber(), entity.getCreateTime(), entity.getAuthStatus(), entity.getAuthTime(), entity.getId());
+    }
+
+    @Override
+    public Collection<TUserEntity> queryByStatus(int authStatus) {
+        String sql = "select id, gameId, pi, passportName, realName, idNum, createTime," +
+                " authStatus, authTime from t_user where authStatus = ?";
+        List<TUserEntity> results = jdbc.query(sql, new TUserEntityMapper(), authStatus);
+        if (CollectionUtils.isEmpty(results)) {
+            return null;
+        }
+       return results;
     }
 
     public List<TUserEntity> findAll() {

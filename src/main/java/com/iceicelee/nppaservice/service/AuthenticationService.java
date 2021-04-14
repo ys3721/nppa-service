@@ -79,6 +79,13 @@ public class AuthenticationService {
             nppaCheckResp.parserFromJson(respStr);
         }
         return nppaCheckResp;
+    }
+
+
+    public void goNppaAuthQuery(String ai) {
+        String queryUrl = "api2.wlc.nppa.gov.cn/idcard/authentication/query";
+        Map<String, String> reqHeadMap = this.buildCommonReqHeadMap();
+        String respStr = httpClient.get(queryUrl, reqHeadMap, null);
 
     }
 
@@ -105,9 +112,8 @@ public class AuthenticationService {
         headPropertyMap.put("timestamps", System.currentTimeMillis() + "");
         return headPropertyMap;
     }
-    public void goNppaAuthQuery(User user) {
 
-    }
+
 
     public NppaConfig getNppaConfig() {
         return nppaConfig;

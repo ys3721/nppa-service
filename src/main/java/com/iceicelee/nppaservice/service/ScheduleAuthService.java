@@ -19,9 +19,12 @@ public class ScheduleAuthService {
 
     private IUserService userService;
 
+    private AuthenticationService authService;
+
     @Autowired
-    public ScheduleAuthService(IUserService userService) {
+    public ScheduleAuthService(IUserService userService, AuthenticationService authService) {
         this.userService = userService;
+        this.authService = authService;
     }
 
 
@@ -34,11 +37,26 @@ public class ScheduleAuthService {
                 user.setAuthStatus(AuthenticationStatus.FAIL);
                 userService.saveOrUpdateUser(user);
             } else {
-                //xxxxxxxxxxxxxxx去取结果吧 成功标成功 失败标失败 
+                AuthenticationStatus status = this.goNppaQueryResult(user);
+                if (AuthenticationStatus.FAIL == status) {
+                    //失败 标记失败
+                    user.setAuthStatus(AuthenticationStatus.FAIL);
+                    user.setAuthTime(new Timestamp(System.currentTimeMillis()));
+                    userService.saveOrUpdateUser(user);
+                }
+                if (AuthenticationStatus.SUCCESS == status) {
+                    user.setAuthStatus(AuthenticationStatus.SUCCESS);
+                    user.setAuthTime(new Timestamp(System.currentTimeMillis()));
+                    userService.saveOrUpdateUser(user);
+                }
             }
 
         }
 
+    }
+
+    private AuthenticationStatus goNppaQueryResult(User user) {
+        authService.goNppaAuthQuery(user);
     }
 
 }

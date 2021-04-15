@@ -1,6 +1,5 @@
 package com.iceicelee.nppaservice.http.request;
 
-import com.iceicelee.nppaservice.http.HttpConnector;
 import com.iceicelee.nppaservice.http.IHttpClient;
 import com.iceicelee.nppaservice.pojo.NppaCheckResp;
 import org.apache.commons.lang.StringUtils;

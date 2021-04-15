@@ -1,11 +1,5 @@
 package com.iceicelee.nppaservice.constants;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author yaoshuai
  * @since 2021-四月-06

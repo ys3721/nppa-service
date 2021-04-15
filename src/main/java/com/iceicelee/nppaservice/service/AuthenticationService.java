@@ -5,7 +5,6 @@ import com.iceicelee.nppaservice.dao.UserDao;
 import com.iceicelee.nppaservice.http.IHttpClient;
 import com.iceicelee.nppaservice.http.request.AuthenticationQueryRequest;
 import com.iceicelee.nppaservice.pojo.NppaCheckResp;
-import com.iceicelee.nppaservice.pojo.User;
 import com.iceicelee.nppaservice.utils.EncryptUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;

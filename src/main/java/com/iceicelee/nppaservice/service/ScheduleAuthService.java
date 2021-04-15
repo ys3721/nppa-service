@@ -1,7 +1,6 @@
 package com.iceicelee.nppaservice.service;
 
 import com.iceicelee.nppaservice.constants.AuthenticationConstants.AuthenticationStatus;
-import com.iceicelee.nppaservice.http.request.AuthenticationQueryRequest;
 import com.iceicelee.nppaservice.pojo.NppaCheckResp;
 import com.iceicelee.nppaservice.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,6 @@
 package com.iceicelee.nppaservice.dao;
 
 import com.iceicelee.nppaservice.entity.TUserEntity;
-import com.iceicelee.nppaservice.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;

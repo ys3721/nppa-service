@@ -94,8 +94,6 @@ public class AuthenticationService {
         return request.send();
     }
 
-    public 
-
     /**
      *
      * @return

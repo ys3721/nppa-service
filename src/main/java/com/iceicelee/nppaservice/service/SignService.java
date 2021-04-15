@@ -45,7 +45,9 @@ public class SignService {
         for (String key : sortKeys) {
             materials.append(key).append(allArgs.get(key));
         }
-        materials.append(encryptedData);
+        if (encryptedData != null) {
+            materials.append(encryptedData);
+        }
         String all = nppaConfig.getSecretKey() + materials.toString();
         return EncryptUtils.sign(all);
     }

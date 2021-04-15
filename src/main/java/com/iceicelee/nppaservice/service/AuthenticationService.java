@@ -3,6 +3,7 @@ package com.iceicelee.nppaservice.service;
 import com.iceicelee.nppaservice.config.NppaConfig;
 import com.iceicelee.nppaservice.dao.UserDao;
 import com.iceicelee.nppaservice.http.IHttpClient;
+import com.iceicelee.nppaservice.http.request.AuthenticationQueryRequest;
 import com.iceicelee.nppaservice.pojo.NppaCheckResp;
 import com.iceicelee.nppaservice.pojo.User;
 import com.iceicelee.nppaservice.utils.EncryptUtils;
@@ -82,12 +83,18 @@ public class AuthenticationService {
     }
 
 
-    public void goNppaAuthQuery(String ai) {
-        String queryUrl = "api2.wlc.nppa.gov.cn/idcard/authentication/query";
+    public NppaCheckResp goNppaAuthQuery(String ai) {
+        AuthenticationQueryRequest request = new AuthenticationQueryRequest(httpClient);
+        HashMap<String, String> reqParams = new HashMap<>();
         Map<String, String> reqHeadMap = this.buildCommonReqHeadMap();
-        String respStr = httpClient.get(queryUrl, reqHeadMap, null);
-
+        reqParams.put("ai", ai);
+        String sign =  signService.sign(reqHeadMap, reqParams, null);
+        reqHeadMap.put("sign", sign);
+        request.assemble(reqHeadMap , reqParams);
+        return request.send();
     }
+
+    public 
 
     /**
      *

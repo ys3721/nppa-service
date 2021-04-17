@@ -33,6 +33,7 @@ public class HttpConnector implements IHttpClient {
             connection = (HttpURLConnection) url.openConnection();
             configConnection(requestProperty, connection);
             connection.setRequestMethod("POST");
+            System.err.println(url);
             connection.connect();
             connection.getOutputStream().write(postData.getBytes(UTF_8));
             inputStream = connection.getInputStream();

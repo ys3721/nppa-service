@@ -128,8 +128,17 @@ public class User {
         if (StringUtils.isEmpty(pi)) {
             return "0";
         }
-        //前六位是生日部分
-        String birthdayStr = this.getPi().substring(0, 6);
-        return EncryptUtils.twentySix2Decimal(birthdayStr)+"";
+        //前六位是生日部分 1hgdci
+        String birthdayPiStr = this.getPi().substring(0, 6);
+        try {
+            long birthLong = EncryptUtils.twentySix2Decimal(birthdayPiStr);
+            StringBuilder stringBuilder = new StringBuilder(birthLong+"");
+            //弄成这种格式1994-03-02
+            stringBuilder.insert(4,"-");
+            stringBuilder.insert(7,"-");
+            return stringBuilder.toString();
+        } catch (Exception e) {
+            return "1900-01-01";
+        }
     }
 }

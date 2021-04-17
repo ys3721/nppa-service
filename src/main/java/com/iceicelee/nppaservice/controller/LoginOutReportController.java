@@ -18,7 +18,7 @@ public class LoginOutReportController {
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
     @RequestMapping(value = "/loginout.go")
-    public String loginOutReport(HttpServletRequest req, int userId, String idfa) {
+    public String loginOutReport(HttpServletRequest req, int userId, String idfa, int inOrOut) {
         String ip = req.getRemoteAddr();
         return "";
     }

@@ -63,7 +63,7 @@ public class AuthenticationController {
      *  "sign", fdloginrequest.g
      * @return
      */
-    @RequestMapping(value = "/local.logincheck.go")
+    @RequestMapping(value = "/sdk.login.go")
     public String loginCheck(HttpServletRequest req, int timestamp, int gameid, int serverid, int logintype, String device,
                              String devicetype, String deviceversion, String deviceudid, String devicemac,
                              String deviceidfa, String appversion, String appsflyerid, String sdktitle,
@@ -73,7 +73,7 @@ public class AuthenticationController {
         String loginCheckUrl = "http://api.feidou.com/local.logincheck.php";
         Map<String, String> localReqParams = new HashMap<>();
         //md5(timestamp+username+ip+gameid+serverid+password+logintype+key)注意顺序。
-        String localSign = EncryptUtils.encodeByMD5(timestamp+username+ip+"5614"+serverid+password+logintype+"qWIbvFQpdIrtUg4MayqW");
+        String localSign = EncryptUtils.encodeByMD5(timestamp+username+ip+gameid+serverid+password+logintype+"qWIbvFQpdIrtUg4MayqW");
         localReqParams.put("timestamp", timestamp+"");
         localReqParams.put("username", username);
         localReqParams.put("ip", ip);
@@ -140,7 +140,7 @@ public class AuthenticationController {
      * @return
      */
     @RequestMapping("/local.faceid.go")
-    public String realNameAuth(HttpServletRequest req, int timestamp, int gameid, int serverid, int logintype, String device,
+    public String realNameAuth(HttpServletRequest req, int timestamp, int gameid, String serverid, int logintype, String device,
                                String devicetype, String deviceversion, String deviceudid, String devicemac,
                                String deviceidfa, String appversion, String appsflyerid, String sdktitle,
                                String sdkversion, String username, String password, String sign,

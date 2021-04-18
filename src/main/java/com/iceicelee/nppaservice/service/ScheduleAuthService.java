@@ -35,7 +35,7 @@ public class ScheduleAuthService {
 
     private void start() {
         ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1);
-        scheduledExecutorService.scheduleWithFixedDelay(this::queryAuthResult, 15, 15, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(this::queryAuthResult, 15, 15, TimeUnit.MINUTES);
     }
 
 

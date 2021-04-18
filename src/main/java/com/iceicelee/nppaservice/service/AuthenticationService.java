@@ -93,6 +93,8 @@ public class AuthenticationService {
         return request.send();
     }
 
+    public String goNppaReportLoginOut()
+
     /**
      *
      * @return

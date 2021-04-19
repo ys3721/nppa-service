@@ -4,14 +4,19 @@ import com.iceicelee.nppaservice.config.NppaConfig;
 import com.iceicelee.nppaservice.dao.UserDao;
 import com.iceicelee.nppaservice.http.IHttpClient;
 import com.iceicelee.nppaservice.http.request.AuthenticationQueryRequest;
+import com.iceicelee.nppaservice.pojo.LoginOutRequestModel;
+import com.iceicelee.nppaservice.pojo.LoginOutResponse;
 import com.iceicelee.nppaservice.pojo.NppaCheckResp;
 import com.iceicelee.nppaservice.utils.EncryptUtils;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -93,7 +98,26 @@ public class AuthenticationService {
         return request.send();
     }
 
-    public String goNppaReportLoginOut()
+    public LoginOutResponse goNppaReportLoginOut(List<LoginOutRequestModel> reports) {
+        String url = "http://api2.wlc.nppa.gov.cn/behavior/collection/loginout";
+        String postData = this.buildEncryptData(this.jsonify(reports));
+        Map<String, String> reqHeadMap = this.buildCommonReqHeadMap();
+        String sign =  signService.sign(reqHeadMap, null, postData);
+        reqHeadMap.put("sign", sign);
+        String respStr = httpClient.post(url, reqHeadMap, postData);
+        LoginOutResponse loginOutResponse = new LoginOutResponse();
+        loginOutResponse.parserFromJson(respStr);
+        return loginOutResponse;
+    }
+
+    private String jsonify(List<LoginOutRequestModel> reports) {
+        JSONArray jsonArray = new JSONArray();
+        for (int i = 0; i < reports.size(); i++) {
+            LoginOutRequestModel model = reports.get(i);
+            jsonArray.add(i, model.toJsonProtocolStr(i));
+        }
+        return jsonArray.toString();
+    }
 
     /**
      *
@@ -106,12 +130,21 @@ public class AuthenticationService {
         jo.put("idNum", idNum);
         String dataStr = jo.toString();
 
+       return this.buildEncryptData(dataStr);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public String buildEncryptData(String dataJsonStr) {
         byte[] byteSecretKey = EncryptUtils.hexStringToByte(this.getNppaConfig().getSecretKey());
-        String dataContent = EncryptUtils.aesGcmEncrypt(dataStr, byteSecretKey);
+        String dataContent = EncryptUtils.aesGcmEncrypt(dataJsonStr, byteSecretKey);
         JSONObject postBody = new JSONObject();
         postBody.put("data", dataContent);
         return postBody.toString();
     }
+
 
     private Map<String, String> buildCommonReqHeadMap() {
         Map<String, String> headPropertyMap = new HashMap<>(this.getNppaConfig().getAppIdAndBizIdMap());

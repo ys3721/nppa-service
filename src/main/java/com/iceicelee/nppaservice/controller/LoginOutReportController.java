@@ -33,8 +33,6 @@ public class LoginOutReportController {
     @RequestMapping(value = "/loginout.go")
     public String loginOutReport(HttpServletRequest req, int userId, String idfa, int inOrOut) {
 
-
-
         return "";
     }
 }

@@ -36,6 +36,7 @@ public class NppaCheckResp extends AbstractNppaResponse {
      * {"errcode":4002,"errmsg":"TEST TASK NOT EXIST"}
      */
     public void parserFromJson(String resp) {
+        this.setTotalResponse(resp);
         JSONObject jsonObject = JSONObject.fromObject(resp);
         this.setErrcode(jsonObject.getInt("errcode"));
         this.setErrmsg(jsonObject.getString("errmsg"));

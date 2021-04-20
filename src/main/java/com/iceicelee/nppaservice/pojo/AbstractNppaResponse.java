@@ -17,6 +17,9 @@ public class AbstractNppaResponse {
     private String errmsg;
 
 
+    private String totalResponse;
+
+
     public int getErrcode() {
         return errcode;
     }
@@ -31,5 +34,18 @@ public class AbstractNppaResponse {
 
     public void setErrmsg(String errmsg) {
         this.errmsg = errmsg;
+    }
+
+    public String getTotalResponse() {
+        return totalResponse;
+    }
+
+    public void setTotalResponse(String totalResponse) {
+        this.totalResponse = totalResponse;
+    }
+
+    @Override
+    public String toString() {
+        return totalResponse;
     }
 }

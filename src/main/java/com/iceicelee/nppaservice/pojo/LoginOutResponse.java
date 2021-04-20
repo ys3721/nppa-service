@@ -55,6 +55,7 @@ public class LoginOutResponse extends AbstractNppaResponse {
      * 这个结果是这样的，自己手解一下吧，
      */
     public void parserFromJson(String resp) {
+        this.setTotalResponse(resp);
         JSONObject jsonObject = JSONObject.fromObject(resp);
         this.setErrcode(jsonObject.getInt("errcode"));
         this.setErrmsg(jsonObject.getString("errmsg"));

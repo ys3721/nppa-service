@@ -3,6 +3,8 @@ package com.iceicelee.nppaservice.service;
 import com.iceicelee.nppaservice.constants.AuthenticationConstants.AuthenticationStatus;
 import com.iceicelee.nppaservice.pojo.NppaCheckResp;
 import com.iceicelee.nppaservice.pojo.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +28,8 @@ public class ScheduleAuthService {
 
     private AuthenticationService authService;
 
+    final static Logger logger = LoggerFactory.getLogger(ScheduleAuthService.class);
+
     @Autowired
     public ScheduleAuthService(IUserService userService, AuthenticationService authService) {
         this.userService = userService;
@@ -41,7 +45,7 @@ public class ScheduleAuthService {
 
     public void queryAuthResult() {
         Collection<User> users = userService.findUsersByStatus(AuthenticationStatus.UNDER_WAY);
-        System.out.println("开始检查角色的实名状态");
+        logger.info("数据库共有{}个飞豆用户需要去nppa中宣部平台取实名制结果...",  users.size());
         for (User user : users) {
             //如果认证时间超过48小时 直接失败，等下次再登陆吧
             Timestamp timestamp = user.getAuthTime();

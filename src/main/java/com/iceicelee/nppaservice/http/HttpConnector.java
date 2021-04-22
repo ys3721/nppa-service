@@ -1,5 +1,7 @@
 package com.iceicelee.nppaservice.http;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +23,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @Primary
 public class HttpConnector implements IHttpClient {
 
+    final static Logger logger = LoggerFactory.getLogger(HttpConnector.class);
+
     @Override
     public String post(String urlStr, Map<String, String> requestProperty, String postData) {
         URL url = null;
@@ -33,7 +37,7 @@ public class HttpConnector implements IHttpClient {
             connection = (HttpURLConnection) url.openConnection();
             configConnection(requestProperty, connection);
             connection.setRequestMethod("POST");
-            System.err.println(url);
+            logger.info(new StringBuilder().append("POST访问:").append(url).toString());
             connection.connect();
             connection.getOutputStream().write(postData.getBytes(UTF_8));
             inputStream = connection.getInputStream();
@@ -54,7 +58,9 @@ public class HttpConnector implements IHttpClient {
                 connection.disconnect();
             }
         }
-        return stringBuilder.toString();
+        String responseStr = stringBuilder.toString();
+        logger.info("GET返回:" + responseStr);
+        return responseStr;
     }
 
     private void configConnection(Map<String, String> requestProperty, HttpURLConnection connection) {
@@ -92,7 +98,7 @@ public class HttpConnector implements IHttpClient {
             connection = (HttpURLConnection) url.openConnection();
             configConnection(reqProps, connection);
             connection.setRequestMethod("GET");
-            System.err.println(url);
+            logger.info("GET访问:" + url);
             connection.connect();
             inputStream = connection.getInputStream();
             bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -113,7 +119,7 @@ public class HttpConnector implements IHttpClient {
             }
         }
         String responseStr = stringBuilder.toString();
-        System.err.println(responseStr);
+        logger.info("GET返回:" + responseStr);
         return responseStr;
     }
 
@@ -126,5 +132,4 @@ public class HttpConnector implements IHttpClient {
             }
         }
     }
-
 }

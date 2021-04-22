@@ -15,7 +15,7 @@ public class NppaServiceErrorController implements ErrorController {
 
     @RequestMapping(value = PATH)
     public String error() {
-        return "fail:999";
+        return "fail:9999";
     }
 
     @Override

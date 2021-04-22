@@ -10,6 +10,7 @@ import com.iceicelee.nppaservice.service.AuthenticationService;
 import com.iceicelee.nppaservice.service.IUserService;
 import com.iceicelee.nppaservice.service.UserService;
 import com.iceicelee.nppaservice.utils.EncryptUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,11 +65,16 @@ public class AuthenticationController {
      * @return
      */
     @RequestMapping(value = "/sdk.login.go")
-    public String loginCheck(HttpServletRequest req, int timestamp, int gameid, int serverid, int logintype, String device,
+    public String loginCheck(HttpServletRequest req, int timestamp, int gameid, String serverid, int logintype, String device,
                              String devicetype, String deviceversion, String deviceudid, String devicemac,
                              String deviceidfa, String appversion, String appsflyerid, String sdktitle,
                              String sdkversion, String username, String password, String sign) {
+        String calSign = EncryptUtils.encodeByMD5(("jasdlfjWRSSajfjalsdfasdf" + timestamp + username + gameid + password + "1"));
+        if(!calSign.equals(sign)) {
+            log.error("sdk.login.go签名校验失败，请检查！");
+        }
         String ip = req.getRemoteAddr();
+        serverid = Strings.isEmpty(serverid) ? "0": serverid;
         //先去飞豆取飞豆号
         String loginCheckUrl = "http://api.feidou.com/local.logincheck.php";
         Map<String, String> localReqParams = new HashMap<>();
@@ -78,7 +84,7 @@ public class AuthenticationController {
         localReqParams.put("username", username);
         localReqParams.put("ip", ip);
         localReqParams.put("gameid", gameid+"");
-        localReqParams.put("serverid", serverid+"");
+        localReqParams.put("serverid", serverid);
         localReqParams.put("password", password);
         localReqParams.put("logintype", logintype+"");
         localReqParams.put("device", device);
@@ -146,6 +152,10 @@ public class AuthenticationController {
                                String sdkversion, String username, String password, String sign,
                                String userid, String name, String idcard) {
         //check sign and time timestamp
+        String calSign = EncryptUtils.encodeByMD5("jasdlfjWRSSajfjalsdfasdf" + timestamp + userid + gameid + name + idcard);
+        if(!calSign.equals(sign)) {
+            log.error("local.faceid.go签名校验失败，请检查！");
+        }
         //先去飞豆实名认证一下，飞豆重复认证直,接返回ok:1,但是不会更新之前的实名认证信息
         String faceIdCheckUrl = "http://api.feidou.com/local.faceid.php";
         String ip = req.getRemoteAddr();

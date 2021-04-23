@@ -22,9 +22,20 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf', version: '2.4.4'
     implementation "net.sf.json-lib:json-lib:2.4:jdk15"
     implementation group: 'org.springframework.boot', name: 'spring-boot-devtools', version: '2.4.4'
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-log4j2
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2', version: '2.4.4'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
+
+configurations.all {
+    resolutionStrategy.dependencySubstitution.all { dependency ->
+        if (dependency.requested instanceof ModuleComponentSelector && dependency.requested.module == 'spring-boot-starter-logging') {
+            dependency.useTarget("org.springframework.boot:spring-boot-starter-log4j2:$dependency.requested.version", 'Use Log4j2 instead of Logback')
+        }
+    }
+}
+
 
 test {
     useJUnitPlatform()

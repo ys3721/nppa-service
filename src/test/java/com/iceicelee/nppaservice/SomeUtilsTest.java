@@ -14,4 +14,10 @@ public class SomeUtilsTest {
         int result = (int) EncryptUtils.twentySix2Decimal("1hba9k");
         System.out.println(result);
     }
+
+    @Test
+    public void testMd5() {
+
+        System.out.println(EncryptUtils.encodeByMD5("1619096058ys3721@hotmail.com127.0.0.156320fei4747471qWIbvFQpdIrtUg4MayqW"));
+    }
 }

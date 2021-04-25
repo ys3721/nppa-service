@@ -7,9 +7,15 @@ plugins {
 group = 'com.iceicelee'
 version = '0.0.2'
 
-repositories {
-    maven { url 'https://maven.aliyun.com/repository/public/' }
-    maven { url 'https://maven.aliyun.com/repository/spring/'}
+allprojects {
+    repositories {
+        maven {
+            url 'http://maven.aliyun.com/nexus/content/groups/public/'
+        }
+        maven {
+            url 'http://maven.aliyun.com/nexus/content/repositories/jcenter'
+        }
+    }
 }
 
 dependencies {
@@ -24,6 +30,8 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-devtools', version: '2.4.4'
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-log4j2
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2', version: '2.4.4'
+    implementation 'redis.clients:jedis:3.6.0-RC1'
+    implementation 'org.springframework.data:spring-data-redis:2.5.0'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

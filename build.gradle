@@ -7,16 +7,13 @@ plugins {
 group = 'com.iceicelee'
 version = '0.0.2'
 
-allprojects {
-    repositories {
-        maven {
-            url 'http://maven.aliyun.com/nexus/content/groups/public/'
-        }
-        maven {
-            url 'http://maven.aliyun.com/nexus/content/repositories/jcenter'
-        }
-    }
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+
 }
+
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'

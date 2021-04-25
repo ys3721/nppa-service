@@ -5,6 +5,7 @@ import com.iceicelee.nppaservice.dao.UserDao;
 import com.iceicelee.nppaservice.entity.TUserEntity;
 import com.iceicelee.nppaservice.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -20,9 +21,12 @@ public class UserService implements IUserService {
 
     private UserDao userDao;
 
+    private JedisConnectionFactory jcFactory;
+
     @Autowired
-    public UserService(UserDao userDao) {
+    public UserService(UserDao userDao, JedisConnectionFactory jcFactory) {
         this.userDao = userDao;
+        this.jcFactory = jcFactory;
     }
 
     /**
@@ -35,6 +39,8 @@ public class UserService implements IUserService {
      */
     @Override
     public User findUserByPassportId(Long userId) {
+        https://docs.spring.io/spring-data/redis/docs/2.5.0/reference/html/#reference
+        jcFactory.getConnection().save();
         TUserEntity userEntity = userDao.queryById(userId);
         if (userEntity != null) {
             return this.fromEntity(userEntity);

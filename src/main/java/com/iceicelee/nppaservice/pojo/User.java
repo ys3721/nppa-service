@@ -2,6 +2,7 @@ package com.iceicelee.nppaservice.pojo;
 
 import com.iceicelee.nppaservice.constants.AuthenticationConstants.AuthenticationStatus;
 import com.iceicelee.nppaservice.utils.EncryptUtils;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 
 import java.sql.Timestamp;
@@ -140,5 +141,52 @@ public class User {
         } catch (Exception e) {
             return "1900-01-01";
         }
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", gameId=" + gameId +
+                ", pi='" + pi + '\'' +
+                ", passportName='" + passportName + '\'' +
+                ", createTime=" + createTime +
+                ", authStatus=" + authStatus +
+                ", authTime=" + authTime +
+                ", realName='" + realName + '\'' +
+                ", idNumber='" + idNumber + '\'' +
+                '}';
+    }
+
+    /**
+     * 先自己写吧 有时间看看jackson2HashMapper
+     * 然后用一下localdatatime吧
+     * @return
+     */
+    public String toJsonStr() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", this.getId());
+        jsonObject.put("gameId", this.getGameId());
+        jsonObject.put("pi", this.getPi());
+        jsonObject.put("passportName", this.getPassportName());
+        jsonObject.put("createTime", this.getCreateTime().getTime());
+        jsonObject.put("authStatus", this.getAuthStatus().getCode());
+        jsonObject.put("authTime", this.getAuthTime().getTime());
+        jsonObject.put("realName", this.getRealName());
+        jsonObject.put("idNumber", this.getIdNumber());
+        return jsonObject.toString();
+    }
+
+    public void fromJsonStr(String userJsonStr) {
+        JSONObject jsonObject = JSONObject.fromObject(userJsonStr);
+        this.id = jsonObject.getLong("id");
+        this.gameId = jsonObject.getInt("gameId");
+        this.pi = jsonObject.getString("pi");
+        this.passportName = jsonObject.getString("passportName");
+        this.createTime = new Timestamp(jsonObject.getLong("createTime"));
+        this.authStatus = AuthenticationStatus.codeOf(jsonObject.getInt("authStatus"));
+        this.authTime = new Timestamp(jsonObject.getLong("authTime"));
+        this.realName = jsonObject.getString("realName");
+        this.idNumber = jsonObject.getString("idNumber");
     }
 }

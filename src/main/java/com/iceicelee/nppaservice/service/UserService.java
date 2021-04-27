@@ -6,8 +6,11 @@ import com.iceicelee.nppaservice.entity.TUserEntity;
 import com.iceicelee.nppaservice.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.ListOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,12 +24,9 @@ public class UserService implements IUserService {
 
     private UserDao userDao;
 
-    private JedisConnectionFactory jcFactory;
-
     @Autowired
-    public UserService(UserDao userDao, JedisConnectionFactory jcFactory) {
+    public UserService(UserDao userDao) {
         this.userDao = userDao;
-        this.jcFactory = jcFactory;
     }
 
     /**
@@ -39,8 +39,6 @@ public class UserService implements IUserService {
      */
     @Override
     public User findUserByPassportId(Long userId) {
-        https://docs.spring.io/spring-data/redis/docs/2.5.0/reference/html/#reference
-        jcFactory.getConnection().save();
         TUserEntity userEntity = userDao.queryById(userId);
         if (userEntity != null) {
             return this.fromEntity(userEntity);

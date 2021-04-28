@@ -2,13 +2,8 @@ package com.iceicelee.nppaservice.dao;
 
 import com.iceicelee.nppaservice.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.hash.Jackson2HashMapper;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
-import java.net.URL;
 
 /**
  * @author: Yao Shuai
@@ -32,6 +27,5 @@ public class RedisUserDao {
         user.fromJsonStr(userJsonStr);
         return user;
     }
-
 
 }

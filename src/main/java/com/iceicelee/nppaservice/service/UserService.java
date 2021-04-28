@@ -1,6 +1,7 @@
 package com.iceicelee.nppaservice.service;
 
 import com.iceicelee.nppaservice.constants.AuthenticationConstants.AuthenticationStatus;
+import com.iceicelee.nppaservice.dao.RedisUserDao;
 import com.iceicelee.nppaservice.dao.UserDao;
 import com.iceicelee.nppaservice.entity.TUserEntity;
 import com.iceicelee.nppaservice.pojo.User;
@@ -24,9 +25,12 @@ public class UserService implements IUserService {
 
     private UserDao userDao;
 
+    private RedisUserDao redisUserDao;
+
     @Autowired
-    public UserService(UserDao userDao) {
+    public UserService(UserDao userDao, RedisUserDao redisUserDao) {
         this.userDao = userDao;
+        this.redisUserDao = redisUserDao;
     }
 
     /**
@@ -39,11 +43,17 @@ public class UserService implements IUserService {
      */
     @Override
     public User findUserByPassportId(Long userId) {
-        TUserEntity userEntity = userDao.queryById(userId);
-        if (userEntity != null) {
-            return this.fromEntity(userEntity);
+        //先走缓存
+        User user = this.redisUserDao.queryCacheUser(userId);
+        if (user != null) {
+            return user;
         } else {
-            return null;
+            TUserEntity userEntity = userDao.queryById(userId);
+            if (userEntity != null) {
+                return this.fromEntity(userEntity);
+            } else {
+                return null;
+            }
         }
     }
 
@@ -74,29 +84,18 @@ public class UserService implements IUserService {
         return entity;
     }
 
-    public void createUserAndSave(long userId, int gameId, String pi, String passportName, String realName,
-                                  String idCard, int reqTimeSec, int status, long now) {
-        User user = new User();
-        user.setId(userId);
-        user.setGameId(gameId);
-        user.setPi(pi);
-        user.setPassportName(passportName);
-        user.setRealName(realName);
-        user.setIdNumber(idCard);
-        user.setCreateTime(new Timestamp(reqTimeSec * 1000L));
-        user.setAuthStatus(AuthenticationStatus.codeOf((byte) status));
-        user.setAuthTime(new Timestamp(now));
-        this.userDao.saveTUserEntity(this.toEntity(user));
-    }
-
     @Override
     public void saveOrUpdateUser(User user) {
         User existUser = this.findUserByPassportId(user.getId());
         if (existUser == null) {
-            this.userDao.saveTUserEntity(this.toEntity(user));
+            if(this.userDao.saveTUserEntity(this.toEntity(user)) > 0) {
+                this.redisUserDao.addOrUpdateUser(user);
+            }
         } else {
             user.setCreateTime(existUser.getCreateTime());
-            this.userDao.updateTUserEntity(this.toEntity(user));
+            if (this.userDao.updateTUserEntity(this.toEntity(user)) > 0) {
+                this.redisUserDao.addOrUpdateUser(user);
+            }
         }
     }
 

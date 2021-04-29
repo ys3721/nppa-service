@@ -1,6 +1,7 @@
 package com.iceicelee.nppaservice.dao;
 
 import com.iceicelee.nppaservice.pojo.User;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,9 @@ public class RedisUserDao {
 
     public User queryCacheUser(long userId) {
         String userJsonStr = (String) redisTemplate.opsForHash().get(USER_KEY, userId+"");
+        if (Strings.isEmpty(userJsonStr)) {
+            return null;
+        }
         User user = new User();
         user.fromJsonStr(userJsonStr);
         return user;

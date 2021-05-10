@@ -1,13 +1,13 @@
 package com.iceicelee.nppaservice.pojo;
 
 import com.iceicelee.nppaservice.pojo.LoginOutResponse.LoginOutRespData.ReportResult;
-import com.iceicelee.nppaservice.pojo.NppaCheckResp.CheckRespData;
-import com.iceicelee.nppaservice.pojo.NppaCheckResp.CheckRespData.CheckRespResult;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.logging.log4j.util.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -15,6 +15,8 @@ import java.util.List;
  * @date: 2021/4/19 18:14
  */
 public class LoginOutResponse extends AbstractNppaResponse {
+
+    private static final Logger logger = LoggerFactory.getLogger(LoginOutResponse.class);
 
     private LoginOutRespData data;
 
@@ -56,6 +58,10 @@ public class LoginOutResponse extends AbstractNppaResponse {
      */
     public void parserFromJson(String resp) {
         this.setTotalResponse(resp);
+         if (Strings.isEmpty(resp)) {
+             logger.error("Parser resp ERROR， resp=" + resp);
+             return;
+         }
         JSONObject jsonObject = JSONObject.fromObject(resp);
         this.setErrcode(jsonObject.getInt("errcode"));
         this.setErrmsg(jsonObject.getString("errmsg"));

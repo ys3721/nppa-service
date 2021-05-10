@@ -59,7 +59,7 @@ public class HttpConnector implements IHttpClient {
             }
         }
         String responseStr = stringBuilder.toString();
-        logger.info("GET返回:" + responseStr);
+        logger.info("POST返回:" + responseStr);
         return responseStr;
     }
 

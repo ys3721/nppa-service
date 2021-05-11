@@ -114,13 +114,14 @@ public class AuthenticationController {
                 } else if (AuthenticationStatus.UNDER_WAY.equals(user.getAuthStatus())) {
                     //设置 是防沉迷对象， 认证信息完整， 生日随便给一个
                     loginCheckResp.setAddictInfoCompletion(1);
-                    loginCheckResp.setBothDayInfo("2020-02-02");
-                    loginCheckResp.setNeedPreventAddict(1);
+                    loginCheckResp.setBothDayInfo("1982-02-02");
+                    loginCheckResp.setNeedPreventAddict(0);
                     return loginCheckResp.toResponseString();
                 } else {
                     //他成功了
                     loginCheckResp.setAddictInfoCompletion(1);
-                    loginCheckResp.setNeedPreventAddict(0);
+                    //逻辑错误 这个就按平台的来就行了吧
+                    //loginCheckResp.setNeedPreventAddict(0);
                     loginCheckResp.setBothDayInfo(user.getBirthdayIntFromPi());
                     return loginCheckResp.toResponseString();
                 }

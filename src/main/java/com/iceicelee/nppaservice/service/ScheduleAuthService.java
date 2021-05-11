@@ -39,7 +39,7 @@ public class ScheduleAuthService {
 
     private void start() {
         ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1);
-        scheduledExecutorService.scheduleWithFixedDelay(this::queryAuthResult, 2, 2, TimeUnit.MINUTES);
+        scheduledExecutorService.scheduleWithFixedDelay(this::queryAuthResult, 2, 1, TimeUnit.MINUTES);
     }
 
 
@@ -66,7 +66,18 @@ public class ScheduleAuthService {
                     userService.saveOrUpdateUser(user);
                 }
             }
-
+        }
+        //超过48小时的直接判断为失败
+        long now = System.currentTimeMillis();
+        for (User user : users) {
+            if (user.getAuthStatus().equals(AuthenticationStatus.UNDER_WAY)) {
+                if ((now - user.getCreateTime().getTime()) > TimeUnit.MINUTES.toMillis(48)) {
+                    //超过48小时的算失败 标记失败
+                    user.setAuthStatus(AuthenticationStatus.FAIL);
+                    user.setAuthTime(new Timestamp(System.currentTimeMillis()));
+                    userService.saveOrUpdateUser(user);
+                }
+            }
         }
 
     }

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,10 +39,17 @@ public class AuthenticationController {
 
     private IHttpClient httpClient;
 
+    private int thisYear;
+
     @Autowired
     public AuthenticationController(AuthenticationService authService, UserService userService) {
         this.authService = authService;
         this.userService = userService;
+        this.calculateYear();
+    }
+
+    private void calculateYear() {
+        this.thisYear =Calendar.getInstance().get(Calendar.YEAR);
     }
 
     /**
@@ -121,7 +129,9 @@ public class AuthenticationController {
                     //他成功了
                     loginCheckResp.setAddictInfoCompletion(1);
                     //逻辑错误 这个就按平台的来就行了吧
-                    //loginCheckResp.setNeedPreventAddict(0);
+                    String birthDay = user.getBirthdayIntFromPi().replaceAll("-", "");
+                    //是不是防沉迷按照他的生日算一下就得了 不管平台返回来是多少了
+                    loginCheckResp.setNeedPreventAddict(this.isNeedPreventAddict(birthDay) ? 1 : 0);
                     loginCheckResp.setBothDayInfo(user.getBirthdayIntFromPi());
                     return loginCheckResp.toResponseString();
                 }
@@ -133,6 +143,21 @@ public class AuthenticationController {
                 return loginCheckResp.toResponseString();
             }
         }
+    }
+
+    private boolean isNeedPreventAddict(String birthDay) {
+        if (Strings.isEmpty(birthDay) || birthDay.length() < 8) {
+            log.error("生日错误 " + birthDay);
+            return false;
+        }
+        try {
+            int borthYear = Integer.parseInt(birthDay)  / 10000;
+            return thisYear - borthYear < 18;
+        } catch (Exception e) {
+            log.error("生日错误e " + birthDay);
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**

@@ -39,7 +39,7 @@ public class ScheduleAuthService {
 
     private void start() {
         ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1);
-        scheduledExecutorService.scheduleWithFixedDelay(this::queryAuthResult, 2, 1, TimeUnit.MINUTES);
+        scheduledExecutorService.scheduleWithFixedDelay(this::queryAuthResult, 2, 2, TimeUnit.MINUTES);
     }
 
 
@@ -53,7 +53,11 @@ public class ScheduleAuthService {
                 user.setAuthStatus(AuthenticationStatus.FAIL);
                 userService.saveOrUpdateUser(user);
             } else {
-                AuthenticationStatus status = this.goNppaQueryResult(user);
+                NppaCheckResp resp = this.goNppaQueryResult(user);
+                AuthenticationStatus status = AuthenticationStatus.UNDER_WAY;
+                if (resp != null && !resp.isErrorHappen()) {
+                    status = AuthenticationStatus.codeOf(resp.getStatus());
+                }
                 if (AuthenticationStatus.FAIL == status) {
                     //失败 标记失败
                     user.setAuthStatus(AuthenticationStatus.FAIL);
@@ -63,33 +67,16 @@ public class ScheduleAuthService {
                 if (AuthenticationStatus.SUCCESS == status) {
                     user.setAuthStatus(AuthenticationStatus.SUCCESS);
                     user.setAuthTime(new Timestamp(System.currentTimeMillis()));
+                    user.setPi(resp.getPi());
                     userService.saveOrUpdateUser(user);
                 }
             }
         }
-        //超过48小时的直接判断为失败
-        long now = System.currentTimeMillis();
-        for (User user : users) {
-            if (user.getAuthStatus().equals(AuthenticationStatus.UNDER_WAY)) {
-                if ((now - user.getCreateTime().getTime()) > TimeUnit.MINUTES.toMillis(48)) {
-                    //超过48小时的算失败 标记失败
-                    user.setAuthStatus(AuthenticationStatus.FAIL);
-                    user.setAuthTime(new Timestamp(System.currentTimeMillis()));
-                    userService.saveOrUpdateUser(user);
-                }
-            }
-        }
-
     }
 
-    private AuthenticationStatus goNppaQueryResult(User user) {
+    private NppaCheckResp goNppaQueryResult(User user) {
         NppaCheckResp resp = authService.goNppaAuthQuery(user.getId() + "");
-        if (resp.isErrorHappen()) {
-            //日志
-            return AuthenticationStatus.UNDER_WAY;
-        } else {
-            return AuthenticationStatus.codeOf(resp.getStatus());
-        }
+        return resp;
     }
 
 }

@@ -45,31 +45,36 @@ public class ScheduleAuthService {
 
     public void queryAuthResult() {
         Collection<User> users = userService.findUsersByStatus(AuthenticationStatus.UNDER_WAY);
-        logger.info("数据库共有{}个飞豆用户需要去nppa中宣部平台取实名制结果...",  users.size());
+        logger.info("数据库共有{}个飞豆用户需要去nppa中宣部平台取实名制结果...", users.size());
         for (User user : users) {
-            //如果认证时间超过48小时 直接失败，等下次再登陆吧
-            Timestamp timestamp = user.getAuthTime();
-            if (System.currentTimeMillis() > timestamp.getTime() + TimeUnit.DAYS.toMillis(2)) {
-                user.setAuthStatus(AuthenticationStatus.FAIL);
-                userService.saveOrUpdateUser(user);
-            } else {
-                NppaCheckResp resp = this.goNppaQueryResult(user);
-                AuthenticationStatus status = AuthenticationStatus.UNDER_WAY;
-                if (resp != null && !resp.isErrorHappen()) {
-                    status = AuthenticationStatus.codeOf(resp.getStatus());
-                }
-                if (AuthenticationStatus.FAIL == status) {
-                    //失败 标记失败
+            try {
+                //如果认证时间超过48小时 直接失败，等下次再登陆吧
+                Timestamp timestamp = user.getAuthTime();
+                if (System.currentTimeMillis() > timestamp.getTime() + TimeUnit.DAYS.toMillis(2)) {
                     user.setAuthStatus(AuthenticationStatus.FAIL);
-                    user.setAuthTime(new Timestamp(System.currentTimeMillis()));
                     userService.saveOrUpdateUser(user);
+                } else {
+                    NppaCheckResp resp = this.goNppaQueryResult(user);
+                    AuthenticationStatus status = AuthenticationStatus.UNDER_WAY;
+                    if (resp != null && !resp.isErrorHappen()) {
+                        status = AuthenticationStatus.codeOf(resp.getStatus());
+                    }
+                    if (AuthenticationStatus.FAIL == status) {
+                        //失败 标记失败
+                        user.setAuthStatus(AuthenticationStatus.FAIL);
+                        user.setAuthTime(new Timestamp(System.currentTimeMillis()));
+                        userService.saveOrUpdateUser(user);
+                    }
+                    if (AuthenticationStatus.SUCCESS == status) {
+                        user.setAuthStatus(AuthenticationStatus.SUCCESS);
+                        user.setAuthTime(new Timestamp(System.currentTimeMillis()));
+                        user.setPi(resp.getPi());
+                        userService.saveOrUpdateUser(user);
+                    }
                 }
-                if (AuthenticationStatus.SUCCESS == status) {
-                    user.setAuthStatus(AuthenticationStatus.SUCCESS);
-                    user.setAuthTime(new Timestamp(System.currentTimeMillis()));
-                    user.setPi(resp.getPi());
-                    userService.saveOrUpdateUser(user);
-                }
+            } catch (Exception e) {
+                logger.error("Schedule error", e);
+                e.printStackTrace();
             }
         }
     }
